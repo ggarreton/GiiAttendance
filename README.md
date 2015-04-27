@@ -1,5 +1,1 @@
 # GiiAttendance
-
-Camila Miranda
-
-
