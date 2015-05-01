@@ -3,7 +3,7 @@ this module template code.
 
 * DO NOT PANIC!
 
-* Unzip the archive and read this file
+* Put the files in de /mod directory whit the name "attendance"
 
 * Install the module
 
