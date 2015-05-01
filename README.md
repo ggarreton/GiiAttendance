@@ -1,2 +1,0 @@
-# GiiAttendance
-Germán Garretón
