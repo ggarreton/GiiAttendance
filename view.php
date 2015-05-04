@@ -78,6 +78,10 @@ if ($attendance->intro) {
 
 // Replace the following lines with you own code.
 echo $OUTPUT->heading('Yay! It works!');
+// This function shows me my rol in this course
+echo my_role($COURSE, $USER);
+
+
 
 // Finish the page.
 echo $OUTPUT->footer();

@@ -447,3 +447,42 @@ function attendance_extend_navigation(navigation_node $navref, stdClass $course,
 function attendance_extend_settings_navigation(settings_navigation $settingsnav, navigation_node $attendancenode=null) {
     // TODO Delete this function and its docblock, or implement it.
 }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                               HERE START WHATEVER WE WANT TO WRITE ABOUT FUNCTIONS                                 //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// This function shows me my rol in this course
+function my_role($COURSE, $USER){
+    // I get the context of the course: Where I am?
+    $cContext = context_course::instance($COURSE->id); // global $COURSE
+    // Second, it's gets the id role of the actual user
+    $id_role = current(get_user_roles($cContext, $USER->id))->roleid;
+
+    // Third, review if the id role is only one or they are more
+    if(is_array($id_role)){
+        foreach ($id_role as $key => $value) {
+            if($value == 3){
+                $message="I'm a teacher";
+            }elseif ($value == 5) {
+                $message="I'm a student";
+            }else{
+                $message="I'm not a teacher or a student";
+            }        
+        }
+    }else{
+        if($id_role == 3){
+            $message="I'm a teacher";
+        }elseif ($id_role == 5) {
+            $message="I'm a student";
+        }else{
+            $message="I'm not a teacher or a student";
+        }
+    }
+
+    // Show the message
+    echo $message;
+
+}
+
