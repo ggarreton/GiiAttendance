@@ -77,7 +77,27 @@ if ($attendance->intro) {
 }
 
 // Replace the following lines with you own code.
-echo $OUTPUT->heading('Yay! It works!');
+$sql=  "SELECT DISTINCT u.id AS userid, c.id AS courseid
+        FROM mdl_user u
+        JOIN mdl_user_enrolments ue ON ue.userid = u.id
+        JOIN mdl_enrol e ON e.id = ue.enrolid
+        JOIN mdl_role_assignments ra ON ra.userid = u.id
+        JOIN mdl_context ct ON ct.id = ra.contextid AND ct.contextlevel = 50
+        JOIN mdl_course c ON c.id = ct.instanceid AND e.courseid = c.id
+        JOIN mdl_role r ON r.id = ra.roleid AND r.shortname = 'student'
+        WHERE e.status = 0 AND u.suspended = 0 AND u.deleted = 0
+        AND (ue.timeend = 0 OR ue.timeend > NOW()) AND ue.status = 0
+        AND c.id = $attendance->course";
 
+$students = $DB->get_records_sql( $sql);
+echo $OUTPUT->heading('Yay! It works!');
+$table = new html_table();
+$table->head = array('Nombre Alumno');
+foreach ($students as $student) {
+
+$name = $DB->get_record_sql("SELECT DISTINCT u.firstname FROM mdl_user u WHERE u.id = $student->userid");
+$table->data[] = array($name->firstname);
+}
+echo html_writer::table($table);
 // Finish the page.
 echo $OUTPUT->footer();
