@@ -92,11 +92,11 @@ $sql=  "SELECT DISTINCT u.id AS userid, c.id AS courseid
 $students = $DB->get_records_sql( $sql);
 echo $OUTPUT->heading('Yay! It works!');
 $table = new html_table();
-$table->head = array('Nombre Alumno');
+$table->head = array('First Name','Last Name');
 foreach ($students as $student) {
 
-$name = $DB->get_record_sql("SELECT DISTINCT u.firstname FROM mdl_user u WHERE u.id = $student->userid");
-$table->data[] = array($name->firstname);
+$name = $DB->get_record_sql("SELECT u.firstname, u.lastname FROM mdl_user u WHERE u.id = $student->userid");
+$table->data[] = array($name->firstname,$name->lastname);
 }
 echo html_writer::table($table);
 // Finish the page.
