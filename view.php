@@ -77,6 +77,9 @@ if ($attendance->intro) {
 }
 
 // Replace the following lines with you own code.
+// Get current day, month and year for current user.
+
+// Print formatted date in user time.
 $sql=  "SELECT DISTINCT u.id AS userid, c.id AS courseid
         FROM mdl_user u
         JOIN mdl_user_enrolments ue ON ue.userid = u.id
