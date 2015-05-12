@@ -80,26 +80,45 @@ if ($attendance->intro) {
 // Get current day, month and year for current user.
 
 // Print formatted date in user time.
-$sql=  "SELECT DISTINCT u.id AS userid, c.id AS courseid
-        FROM mdl_user u
-        JOIN mdl_user_enrolments ue ON ue.userid = u.id
-        JOIN mdl_enrol e ON e.id = ue.enrolid
-        JOIN mdl_role_assignments ra ON ra.userid = u.id
-        JOIN mdl_context ct ON ct.id = ra.contextid AND ct.contextlevel = 50
-        JOIN mdl_course c ON c.id = ct.instanceid AND e.courseid = c.id
-        JOIN mdl_role r ON r.id = ra.roleid AND r.shortname = 'student'
-        WHERE e.status = 0 AND u.suspended = 0 AND u.deleted = 0
-        AND (ue.timeend = 0 OR ue.timeend > NOW()) AND ue.status = 0
-        AND c.id = $attendance->course";
+$sql=      "SELECT DISTINCT u.id AS userid, c.id AS courseid
+            FROM mdl_user u
+            JOIN mdl_user_enrolments ue ON ue.userid = u.id
+            JOIN mdl_enrol e ON e.id = ue.enrolid
+            JOIN mdl_role_assignments ra ON ra.userid = u.id
+            JOIN mdl_context ct ON ct.id = ra.contextid AND ct.contextlevel = 50
+            JOIN mdl_course c ON c.id = ct.instanceid AND e.courseid = c.id
+            JOIN mdl_role r ON r.id = ra.roleid AND r.shortname = 'student'
+            WHERE e.status = 0 AND u.suspended = 0 AND u.deleted = 0
+            AND (ue.timeend = 0 OR ue.timeend > NOW()) AND ue.status = 0
+            AND c.id = $attendance->course";
+
+$sql_dates="SELECT date
+            FROM mdl_attendance_detail
+            GROUP BY date
+            ORDER BY date"; 
 
 $students = $DB->get_records_sql( $sql);
+$dates= $DB->get_records_sql( $sql_dates);
+$array= array('Student');
+foreach ($dates as $date) {
+    array_push($array, usergetdate($date->date)["mday"]."-".usergetdate($date->date)["month"]);
+}
 echo $OUTPUT->heading('Yay! It works!');
 $table = new html_table();
-$table->head = array('First Name','Last Name');
+$table->head = $array;
 foreach ($students as $student) {
+    $name = $DB->get_record_sql("SELECT u.firstname, u.lastname FROM mdl_user u WHERE u.id = $student->userid");
+    $data=array($name->firstname." ".$name->lastname);
 
-$name = $DB->get_record_sql("SELECT u.firstname, u.lastname FROM mdl_user u WHERE u.id = $student->userid");
-$table->data[] = array($name->firstname,$name->lastname);
+    foreach($dates as $date){   
+    $dateunix=usergetdate($date->date)[0]; 
+        array_push($data, $DB->get_record_sql( "SELECT sd.attendancestatus 
+                                                FROM mdl_attendance_student_detail sd, mdl_attendance_detail ad 
+                                                WHERE sd.attendancedetailid=ad.id 
+                                                AND ad.date=$dateunix 
+                                                AND sd.userid=$student->userid")->attendancestatus);
+    }
+    $table->data[] = $data;
 }
 echo html_writer::table($table);
 // Finish the page.
