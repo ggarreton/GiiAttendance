@@ -1,0 +1,15 @@
+Este archivo carece de importancia encuanto a codigo, ya que la finalidad es poder compartir recursos que nos puedan facilitar el desarrollo, pueden usarlo como un bloc de notas en caso de que encuentren que lo que han encontrado pueda servirle a los demas.
+
+1.- Codigo para obtener el listados de alumnos (osea aquellos matriculados como "student") matriculados en los diversos cursos (funciona en moodle por defecto, no es exclusivo de nuestro dessarrollo)
+	
+	SELECT DISTINCT u.id AS userid, c.id AS courseid
+	FROM mdl_user u
+	JOIN mdl_user_enrolments ue ON ue.userid = u.id
+	JOIN mdl_enrol e ON e.id = ue.enrolid
+	JOIN mdl_role_assignments ra ON ra.userid = u.id
+	JOIN mdl_context ct ON ct.id = ra.contextid AND ct.contextlevel = 50
+	JOIN mdl_course c ON c.id = ct.instanceid AND e.courseid = c.id
+	JOIN mdl_role r ON r.id = ra.roleid AND r.shortname = 'student'
+	WHERE e.status = 0 AND u.suspended = 0 AND u.deleted = 0
+	AND (ue.timeend = 0 OR ue.timeend > NOW()) AND ue.status = 0
+
