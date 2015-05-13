@@ -461,6 +461,7 @@ function my_role($COURSE, $USER){
     $id_role = current(get_user_roles($cContext, $USER->id))->roleid;
 
     // Third, review if the id role is only one or they are more
+    // After I need to change the place of the strings and move to lang/en
     if(is_array($id_role)){
         foreach ($id_role as $key => $value) {
             if($value == 3){
