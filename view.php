@@ -80,6 +80,7 @@ if ($attendance->intro) {
 // Get current day, month and year for current user.
 
 // Print formatted date in user time.
+// Look the list of joins to know what are the expression u, c, e, ue, ra and ct
 $sql=  "SELECT DISTINCT u.id AS userid, c.id AS courseid
         FROM mdl_user u
         JOIN mdl_user_enrolments ue ON ue.userid = u.id
@@ -94,13 +95,25 @@ $sql=  "SELECT DISTINCT u.id AS userid, c.id AS courseid
 
 $students = $DB->get_records_sql( $sql);
 echo $OUTPUT->heading('Yay! It works!');
-$table = new html_table();
-$table->head = array('First Name','Last Name');
-foreach ($students as $student) {
 
-$name = $DB->get_record_sql("SELECT u.firstname, u.lastname FROM mdl_user u WHERE u.id = $student->userid");
-$table->data[] = array($name->firstname,$name->lastname);
+// This function shows me my rol in this course
+echo my_role($COURSE, $USER);
+
+// Making a table with the list of the users
+$table = new html_table();
+// After those names must to be in the lang/en
+$table->head = array('First Name','Last Name');
+
+// Select the full name of the users that have the rol student in this course
+foreach ($students as $student) {
+    $name = $DB->get_record_sql("SELECT u.firstname, u.lastname FROM mdl_user u WHERE u.id = $student->userid");
+    $table->data[] = array($name->firstname,$name->lastname);
 }
+
 echo html_writer::table($table);
+
 // Finish the page.
 echo $OUTPUT->footer();
+
+
+
