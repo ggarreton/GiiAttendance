@@ -107,9 +107,10 @@ if(is_a_teacher($COURSE, $USER)){
 
 
 	$records 						= new stdClass();
-	$records->attendanceid 			= 12;
+	$records->attendanceid 			= $attendance->id;
 	$records->attendancetipe		= 'by_students';
-	$records->date					= '1431734400';
+	// The date is not the timestamp of the day at 00:00, the date is the actual time in UNIX
+	$records->date					= time();
 	$records->starttime				= '1431819610';
 	$records->endtime 				= '1431829610';
 
@@ -117,6 +118,7 @@ if(is_a_teacher($COURSE, $USER)){
 	// You must ommit 'mdl_', because by default is added
 	$lastinsertid = $DB->insert_record('attendance_detail', $records);
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //view.php

@@ -102,25 +102,33 @@ echo my_role($COURSE, $USER);
 
 
 if(is_a_teacher($COURSE, $USER)){
-    $mform = new simplehtml_form($PAGE->url.'&start_time='.$start_time.'&end_time='.$end_time);
-//    $mform->addElement('hidden', 'attendance', $attendance_id);
+    $mform = new simplehtml_form($PAGE->url);
+    // array('start_time' => $start_time, 'end_time' => $end_time)
+
 
     if($mform->get_data()) {
-        echo 'Yay!';
+        
+        // Recognice data from the form
         $formdata = $mform->get_data();
-        //$id_attendance      = $formdata->fieldname['id_attendance'];
-        $start_time         = $formdata->fieldname['start_time'];
-        $end_time           = $formdata->fieldname['end_time'];
+        
+        // Obteining times in UNIX from the form
+        $start_time         = $formdata->start_of_time;
+        $end_time           = $formdata->end_of_time;
+        
+        // Creating one file to insert in the DB with their attributes
+        $records                        = new stdClass();
+        $records->attendanceid          = $attendance->id;
+        $records->attendancetipe        = 'by_students';
+        // The date is not the timestamp of the day at 00:00, the date is the actual time in UNIX
+        $records->date                  = time();
+        $records->starttime             = $start_time;
+        $records->endtime               = $end_time;
 
-        $newrecord = new stdClass();
-        $newrecord->name = $data->dname;
-        $newrecord->id = $DB->insert_record('tbl_department', $newrecord);
-
-
-        //echo $id_attendance;
-        var_dump($start_time);
-        var_dump($end_time);
-
+        // insert_record('name_of_the_table', 'values_to_insert')
+        // You must ommit 'mdl_', because by default is added
+        $lastinsertid = $DB->insert_record('attendance_detail', $records);        //echo $id_attendance;
+        
+        
     } else {
 
         $mform->display();
