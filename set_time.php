@@ -1,4 +1,7 @@
 <?php
+
+
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -57,7 +60,7 @@ $event->trigger();
 
 // Print the page header.
 
-$PAGE->set_url('/mod/attendance/view.php', array('id' => $cm->id));
+$PAGE->set_url('/mod/attendance/set_time.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($attendance->name));
 $PAGE->set_heading(format_string($course->fullname));
 
@@ -79,27 +82,44 @@ if ($attendance->intro) {
 // Replace the following lines with you own code.
 // Get current day, month and year for current user.
 
-// Print formatted date in user time.
-// Look the list of joins to know what are the expression u, c, e, ue, ra and ct
-$sql=  "SELECT DISTINCT u.id AS userid, c.id AS courseid
-        FROM mdl_user u
-        JOIN mdl_user_enrolments ue ON ue.userid = u.id
-        JOIN mdl_enrol e ON e.id = ue.enrolid
-        JOIN mdl_role_assignments ra ON ra.userid = u.id
-        JOIN mdl_context ct ON ct.id = ra.contextid AND ct.contextlevel = 50
-        JOIN mdl_course c ON c.id = ct.instanceid AND e.courseid = c.id
-        JOIN mdl_role r ON r.id = ra.roleid AND r.shortname = 'student'
-        WHERE e.status = 0 AND u.suspended = 0 AND u.deleted = 0
-        AND (ue.timeend = 0 OR ue.timeend > NOW()) AND ue.status = 0
-        AND c.id = $attendance->course";
+//Only the teacher can insert information in the database
+if(is_a_teacher($COURSE, $USER)){
 
-$students = $DB->get_records_sql( $sql);
-echo $OUTPUT->heading('Yay! It works!');
+	// Saving the values from the form into variables
+	/*$formdata = $mform->get_data();
+	$id_attendance 		= $formdata->fieldname['id_attendance'];
+	$start_time 		= $formdata->fieldname['start_time'];
+	$end_time 			= $formdata->fieldname['end_time'];
+*/
 
-// This function shows me my rol in this course
-echo my_role($COURSE, $USER);
+	// recording_information($name_of_the_column, $value_to_record)
+	// The database structure is:
+	// __________________________________________________________________
+	// | id | attendanceid | attendancetipe | date | starttime | endtime |
+/*	$id_attendance_2 		= recording_information('attendanceid', $id_attendance);
+	$attendance_type 		= recording_information('attendancetipe', 'by_students');
+	$date 					= recording_information('date', $start_time);
+	$start_time_2	 		= recording_information('starttime', $start_time);
+	$end_time_2 			= recording_information('endtime', $end_time);
+
+*/
 
 
+
+	$records 						= new stdClass();
+	$records->attendanceid 			= 12;
+	$records->attendancetipe		= 'by_students';
+	$records->date					= '1431734400';
+	$records->starttime				= '1431819610';
+	$records->endtime 				= '1431829610';
+
+	// insert_record('name_of_the_table', 'values_to_insert')
+	// You must ommit 'mdl_', because by default is added
+	$lastinsertid = $DB->insert_record('attendance_detail', $records);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+//view.php
 
 if(is_a_teacher($COURSE, $USER)){
     $mform = new simplehtml_form($PAGE->url.'&start_time='.$start_time.'&end_time='.$end_time);
@@ -112,11 +132,6 @@ if(is_a_teacher($COURSE, $USER)){
         $start_time         = $formdata->fieldname['start_time'];
         $end_time           = $formdata->fieldname['end_time'];
 
-        $newrecord = new stdClass();
-        $newrecord->name = $data->dname;
-        $newrecord->id = $DB->insert_record('tbl_department', $newrecord);
-
-
         //echo $id_attendance;
         var_dump($start_time);
         var_dump($end_time);
@@ -127,23 +142,18 @@ if(is_a_teacher($COURSE, $USER)){
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-// Making a table with the list of the users
-$table = new html_table();
-// After those names must to be in the lang/en
-$table->head = array('First Name','Last Name');
 
-// Select the full name of the users that have the rol student in this course
-foreach ($students as $student) {
-    $name = $DB->get_record_sql("SELECT u.firstname, u.lastname FROM mdl_user u WHERE u.id = $student->userid");
-    $table->data[] = array($name->firstname,$name->lastname);
-}
 
-echo html_writer::table($table);
+
+
+
+
+
 
 // Finish the page.
 echo $OUTPUT->footer();
 
-
-
+?>

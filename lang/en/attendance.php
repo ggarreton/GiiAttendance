@@ -37,3 +37,6 @@ $string['attendancename_help'] = 'This is the content of the help tooltip associ
 $string['attendance'] = 'attendance';
 $string['pluginadministration'] = 'attendance administration';
 $string['pluginname'] = 'attendance';
+$string['start_of_time'] = 'Start of time: ';
+$string['end_of_time'] = 'End of time: ';
+$string['button_save'] = 'Save';
