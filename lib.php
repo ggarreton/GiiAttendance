@@ -514,6 +514,35 @@ function is_a_teacher($COURSE, $USER){
     return $is_a_teacher;    
 }
 
+function is_a_student($COURSE, $USER){
+    // I get the context of the course: Where I am?
+    $cContext = context_course::instance($COURSE->id); // global $COURSE
+    // Second, it's gets the id role of the actual user
+    $id_role = current(get_user_roles($cContext, $USER->id))->roleid;
+    
+    // Third, review if the id role is only one or they are more
+    // After I need to change the place of the strings and move to lang/en
+    if(is_array($id_role)){
+        foreach ($id_role as $key => $value) {
+            if($value == 5){
+                $is_a_student=true;
+            }else{
+                $is_a_student=false;
+            }        
+        }
+    }else{
+        if($id_role == 5){
+            $is_a_student=true;
+        }else{
+            $is_a_student=false;
+        }
+    }
+
+    return $is_a_student;    
+}
+
+
+
 require_once("$CFG->libdir/formslib.php");
  
 class simplehtml_form extends moodleform {
@@ -532,6 +561,20 @@ class simplehtml_form extends moodleform {
 
     }                           // Close the function
 } 
+
+class present_form extends moodleform {
+ 
+    function definition() {
+        global $CFG;
+ 
+        $mform =& $this->_form; // Don't forget the underscore!
+
+        $this->add_action_buttons( 'Present' );
+        $mform->closeHeaderBefore('present');
+
+    }                           // Close the function
+} 
+
 
 
 function recording_information($name1, $value1){

@@ -115,6 +115,11 @@ if(is_a_teacher($COURSE, $USER)){
         $start_time         = $formdata->start_of_time;
         $end_time           = $formdata->end_of_time;
         
+
+        // The database structure is:
+        // __________________________________________________________________
+        // | id | attendanceid | attendancetipe | date | starttime | endtime |
+
         // Creating one file to insert in the DB with their attributes
         $records                        = new stdClass();
         $records->attendanceid          = $attendance->id;
@@ -135,6 +140,9 @@ if(is_a_teacher($COURSE, $USER)){
     }
 }
 
+if(is_a_student($COURSE, $USER)){
+    redirect('student.php?id='.$id);
+}
 
 
 // Making a table with the list of the users

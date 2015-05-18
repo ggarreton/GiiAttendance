@@ -82,78 +82,61 @@ if ($attendance->intro) {
 // Replace the following lines with you own code.
 // Get current day, month and year for current user.
 
-//Only the teacher can insert information in the database
-if(is_a_teacher($COURSE, $USER)){
+//Only the student can mark as a present
+if(is_a_student($COURSE, $USER)){
+	$sql=  "SELECT starttime, endtime, id
+	FROM mdl_attendance_detail
+	WHERE attendanceid = $attendance->id
+	AND starttime < UNIX_TIMESTAMP(NOW( ))
+	AND endtime > UNIX_TIMESTAMP(NOW( )) ";
 
-	// Saving the values from the form into variables
-	/*$formdata = $mform->get_data();
-	$id_attendance 		= $formdata->fieldname['id_attendance'];
-	$start_time 		= $formdata->fieldname['start_time'];
-	$end_time 			= $formdata->fieldname['end_time'];
-*/
+	$range_of_time = $DB->get_record_sql( $sql);
 
-	// recording_information($name_of_the_column, $value_to_record)
-	// The database structure is:
-	// __________________________________________________________________
-	// | id | attendanceid | attendancetipe | date | starttime | endtime |
-/*	$id_attendance_2 		= recording_information('attendanceid', $id_attendance);
-	$attendance_type 		= recording_information('attendancetipe', 'by_students');
-	$date 					= recording_information('date', $start_time);
-	$start_time_2	 		= recording_information('starttime', $start_time);
-	$end_time_2 			= recording_information('endtime', $end_time);
+	$start_of_time = $range_of_time->sTime;
+	$end_of_time = $range_of_time->eTime;
 
-*/
+	// If the student is on time to mark the attendance
+	if( $sql!=null || $sql!='' || $sql!=array('', '') || $sql!=array(null, null) && $end_of_time>time() ){
+		$pform = new present_form($PAGE->url);
+
+		if($pform->get_data()) {
+        
+	        
+	        // The database structure is:
+    	    // __________________________________________________________________
+        	// | id | attendanceid | attendancetipe | date | starttime | endtime |
+
+        	// Creating one file to insert in the DB with their attributes
+        	$records                        	= new stdClass();
+        	$records->attendancedetailid        = $range_of_time->id;
+        	$records->userid          	    	= $USER->id;
+        	$records->attendancestatus  	    = 'Present';
+        	// The date is not the timestamp of the day at 00:00, the date is the actual time in UNIX
+        	
+	        // insert_record('name_of_the_table', 'values_to_insert')
+        	// You must ommit 'mdl_', because by default is added
+    	    $lastinsertid = $DB->insert_record('attendance_student_detail', $records);        //echo $id_attendance;
+        
+        
+	    } else {
+
+        	$pform->display();
+    	}
+		
+	// If the student doesn't mark the attendance
+//	}else if($end_of_time<time()){
+
+	}
 
 
 
-	$records 						= new stdClass();
-	$records->attendanceid 			= $attendance->id;
-	$records->attendancetipe		= 'by_students';
-	// The date is not the timestamp of the day at 00:00, the date is the actual time in UNIX
-	$records->date					= time();
-	$records->starttime				= '1431819610';
-	$records->endtime 				= '1431829610';
 
-	// insert_record('name_of_the_table', 'values_to_insert')
-	// You must ommit 'mdl_', because by default is added
-	$lastinsertid = $DB->insert_record('attendance_detail', $records);
+
+
+
+
+
 }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-//view.php
-
-if(is_a_teacher($COURSE, $USER)){
-    $mform = new simplehtml_form($PAGE->url.'&start_time='.$start_time.'&end_time='.$end_time);
-//    $mform->addElement('hidden', 'attendance', $attendance_id);
-
-    if($mform->get_data()) {
-        echo 'Yay!';
-        $formdata = $mform->get_data();
-        //$id_attendance      = $formdata->fieldname['id_attendance'];
-        $start_time         = $formdata->fieldname['start_time'];
-        $end_time           = $formdata->fieldname['end_time'];
-
-        //echo $id_attendance;
-        var_dump($start_time);
-        var_dump($end_time);
-
-    } else {
-
-        $mform->display();
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
 
 // Finish the page.
 echo $OUTPUT->footer();
