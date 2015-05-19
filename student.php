@@ -60,7 +60,7 @@ $event->trigger();
 
 // Print the page header.
 
-$PAGE->set_url('/mod/attendance/set_time.php', array('id' => $cm->id));
+$PAGE->set_url('/mod/attendance/student.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($attendance->name));
 $PAGE->set_heading(format_string($course->fullname));
 
@@ -84,13 +84,13 @@ if ($attendance->intro) {
 
 //Only the student can mark as a present
 if(is_a_student($COURSE, $USER)){
-	$sql=  "SELECT starttime, endtime, id
+	$sql = "SELECT starttime, endtime, id
 	FROM mdl_attendance_detail
 	WHERE attendanceid = $attendance->id
 	AND starttime < UNIX_TIMESTAMP(NOW( ))
 	AND endtime > UNIX_TIMESTAMP(NOW( )) ";
 
-	$range_of_time = $DB->get_record_sql( $sql);
+	$range_of_time = $DB->get_record_sql( $sql );
 
 	$start_of_time = $range_of_time->sTime;
 	$end_of_time = $range_of_time->eTime;
@@ -101,21 +101,32 @@ if(is_a_student($COURSE, $USER)){
 
 		if($pform->get_data()) {
         
-	        
-	        // The database structure is:
-    	    // __________________________________________________________________
-        	// | id | attendanceid | attendancetipe | date | starttime | endtime |
+            $id_current_attendance = $DB->get_record_sql("SELECT id 
+            FROM mdl_attendance_detail 
+            WHERE attendanceid = $attendance->id
+            ORDER BY id DESC
+            LIMIT 1");
+
+            // The table structure is:
+            // _______________________________________________________
+            // | id | attendancedetailid | userid | attendancestatus |
+
+            $sql2 = "SELECT id 
+            FROM mdl_attendance_student_detail 
+            WHERE attendancedetailid = $id_current_attendance->id
+            AND userid = $USER->id";
+
+            $attendance_user_id = $DB->get_record_sql( $sql2 );
 
         	// Creating one file to insert in the DB with their attributes
         	$records                        	= new stdClass();
-        	$records->attendancedetailid        = $range_of_time->id;
-        	$records->userid          	    	= $USER->id;
+        	$records->id            	    	= $attendance_user_id->id;
         	$records->attendancestatus  	    = 'Present';
         	// The date is not the timestamp of the day at 00:00, the date is the actual time in UNIX
         	
 	        // insert_record('name_of_the_table', 'values_to_insert')
         	// You must ommit 'mdl_', because by default is added
-    	    $lastinsertid = $DB->insert_record('attendance_student_detail', $records);        //echo $id_attendance;
+    	    $lastinsertid = $DB->update_record('attendance_student_detail', $records);        //echo $id_attendance;
         
         
 	    } else {
@@ -123,8 +134,6 @@ if(is_a_student($COURSE, $USER)){
         	$pform->display();
     	}
 		
-	// If the student doesn't mark the attendance
-//	}else if($end_of_time<time()){
 
 	}
 

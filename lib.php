@@ -569,7 +569,7 @@ class present_form extends moodleform {
  
         $mform =& $this->_form; // Don't forget the underscore!
 
-        $this->add_action_buttons( 'Present' );
+        $this->add_action_buttons( $cancel = false, $submitlabel='Present' );
         $mform->closeHeaderBefore('present');
 
     }                           // Close the function

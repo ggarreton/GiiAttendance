@@ -99,8 +99,6 @@ echo $OUTPUT->heading('Yay! It works!');
 // This function shows me my rol in this course
 echo my_role($COURSE, $USER);
 
-
-
 if(is_a_teacher($COURSE, $USER)){
     $mform = new simplehtml_form($PAGE->url);
     // array('start_time' => $start_time, 'end_time' => $end_time)
@@ -116,7 +114,7 @@ if(is_a_teacher($COURSE, $USER)){
         $end_time           = $formdata->end_of_time;
         
 
-        // The database structure is:
+        // The table structure is:
         // __________________________________________________________________
         // | id | attendanceid | attendancetipe | date | starttime | endtime |
 
@@ -133,6 +131,24 @@ if(is_a_teacher($COURSE, $USER)){
         // You must ommit 'mdl_', because by default is added
         $lastinsertid = $DB->insert_record('attendance_detail', $records);        //echo $id_attendance;
         
+        $id_current_attendance = $DB->get_record_sql("SELECT id 
+            FROM mdl_attendance_detail 
+            WHERE attendanceid = $attendance->id
+            ORDER BY id DESC
+            LIMIT 1");
+
+        // The table structure is:
+        // _______________________________________________________
+        // | id | attendancedetailid | userid | attendancestatus |
+
+        foreach ($students as $student) {
+            $record_absent->attendancedetailid      = $id_current_attendance->id;
+            $record_absent->userid                  = $student->userid;
+            $record_absent->attendancestatus        = 'Absent';
+            
+            $make_all_students_absent = $DB->insert_record('attendance_student_detail', $record_absent);        //echo $id_attendance;
+        }
+
         
     } else {
 
@@ -140,9 +156,6 @@ if(is_a_teacher($COURSE, $USER)){
     }
 }
 
-if(is_a_student($COURSE, $USER)){
-    redirect('student.php?id='.$id);
-}
 
 
 // Making a table with the list of the users
@@ -154,9 +167,15 @@ $table->head = array('First Name','Last Name');
 foreach ($students as $student) {
     $name = $DB->get_record_sql("SELECT u.firstname, u.lastname FROM mdl_user u WHERE u.id = $student->userid");
     $table->data[] = array($name->firstname,$name->lastname);
+       
 }
 
 echo html_writer::table($table);
+
+// If a student go inside this page, he/she is going to redirct to student.php, because he/she wants to mark him/her attendance
+if(is_a_student($COURSE, $USER)){
+    redirect('student.php?id='.$id);
+}
 
 // Finish the page.
 echo $OUTPUT->footer();
