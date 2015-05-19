@@ -465,20 +465,20 @@ function my_role($COURSE, $USER){
     if(is_array($id_role)){
         foreach ($id_role as $key => $value) {
             if($value == 3){
-                $message="teacher";
+                $message="I'm a teacher";
             }elseif ($value == 5) {
-                $message="student";
+                $message="I'm a student";
             }else{
-                $message="You need to log in as a Teacher or Student to use this feature.";
+                $message="I'm not a teacher or a student";
             }        
         }
     }else{
         if($id_role == 3){
-            $message="teacher";
+            $message="I'm a teacher";
         }elseif ($id_role == 5) {
-            $message="student";
+            $message="I'm a student";
         }else{
-            $message="You need to log in as a Teacher or Student to use this feature.";
+            $message="I'm not a teacher or a student";
         }
     }
 
@@ -486,4 +486,98 @@ function my_role($COURSE, $USER){
     return $message;
 
 }
+
+function is_a_teacher($COURSE, $USER){
+    // I get the context of the course: Where I am?
+    $cContext = context_course::instance($COURSE->id); // global $COURSE
+    // Second, it's gets the id role of the actual user
+    $id_role = current(get_user_roles($cContext, $USER->id))->roleid;
+    
+    // Third, review if the id role is only one or they are more
+    // After I need to change the place of the strings and move to lang/en
+    if(is_array($id_role)){
+        foreach ($id_role as $key => $value) {
+            if($value == 3){
+                $is_a_teacher=true;
+            }else{
+                $is_a_teacher=false;
+            }        
+        }
+    }else{
+        if($id_role == 3){
+            $is_a_teacher=true;
+        }else{
+            $is_a_teacher=false;
+        }
+    }
+
+    return $is_a_teacher;    
+}
+
+require_once("$CFG->libdir/formslib.php");
+ 
+class simplehtml_form extends moodleform {
+ 
+    function definition() {
+        global $CFG;
+ 
+        $mform =& $this->_form; // Don't forget the underscore! 
+ 
+        $mform->addElement('date_time_selector', 'start_of_time', get_string('start_of_time', 'mod_attendance') );
+        $mform->addElement('date_time_selector', 'end_of_time', get_string('end_of_time', 'mod_attendance') );
+        
+
+        $this->add_action_buttons( null );
+        $mform->closeHeaderBefore('save');
+
+    }                           // Close the function
+} 
+
+
+function recording_information($name1, $value1){
+    $record = new stdClass();
+    $record->name           = $name1;
+    $record->displayorder   = $value1;
+    return $record;
+}
+
+class attendacehtml_form extends moodleform {
+ 
+    function definition() {
+        global $CFG;
+        global $DB;
+ 
+        $mform =& $this->_form; // Don't forget the underscore! 
+        // Making a table with the list of the users and the actual status of attendance
+        $sql=  "SELECT DISTINCT u.id AS userid, c.id AS courseid
+            FROM mdl_user u
+            JOIN mdl_user_enrolments ue ON ue.userid = u.id
+            JOIN mdl_enrol e ON e.id = ue.enrolid
+            JOIN mdl_role_assignments ra ON ra.userid = u.id
+            JOIN mdl_context ct ON ct.id = ra.contextid AND ct.contextlevel = 50
+            JOIN mdl_course c ON c.id = ct.instanceid AND e.courseid = c.id
+            JOIN mdl_role r ON r.id = ra.roleid AND r.shortname = 'student'
+            WHERE e.status = 0 AND u.suspended = 0 AND u.deleted = 0
+            AND (ue.timeend = 0 OR ue.timeend > NOW()) AND ue.status = 0
+            AND c.id = 2";
+
+        $students = $DB->get_records_sql($sql);
+        
+
+
+
+        foreach ($students as $student) {
+
+
+            $mform->addElement('checkbox', $name->id);
+        }
+
+$this->add_action_buttons( null );
+$mform->closeHeaderBefore('save');
+
+    }                           // Close the function
+}       
+
+
+
 
