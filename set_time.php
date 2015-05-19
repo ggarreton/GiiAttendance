@@ -85,11 +85,13 @@ $sql_dates="SELECT date
 
 $students = $DB->get_records_sql( $sql);
 $dates= $DB->get_records_sql( $sql_dates);
-$array= array('Student');
 
-foreach ($dates as $date) {
-    array_push($array, usergetdate($date->date)["mday"]."-".usergetdate($date->date)["month"]);
-}
+
+
+
+
+
+
 
 if(is_a_teacher($COURSE, $USER)){
     $mform = new simplehtml_form($PAGE->url);
@@ -139,41 +141,10 @@ if(is_a_teacher($COURSE, $USER)){
     }
 }
 
-echo'<ul class="nav nav-tabs">
-<li><a href="#tab1" data-toggle="tab">Take Attendance</a></li>
-<li class="active"><a href="#tab2" data-toggle="tab">Attendance Review</a></li>
-</ul>
-<!-- tab section -->
-<div class="tab-content">
-<div class="tab-pane" id="tab1">';
-echo '<ul class="nav nav-pills nav-stacked">
-  <li role="presentation"><a href="passattendance.php?id='.$id.'">Take Attendance</a></li>
-  <li role="presentation"><a href="teacher.php?id='.$id.'">Students Mark Attendances</a></li>
-</ul>';
-echo'</div>
-<div class="tab-pane active" id="tab2">';
 
-echo $OUTPUT->heading('Students Attendances');
 
-$table = new html_table();
-$table->head = $array;
-foreach ($students as $student) {
-    $name = $DB->get_record_sql("SELECT u.firstname, u.lastname FROM mdl_user u WHERE u.id = $student->userid");
-    $data=array($name->firstname." ".$name->lastname);
-    foreach($dates as $date){   
-    $dateunix=usergetdate($date->date)[0]; 
-        array_push($data, $DB->get_record_sql( "SELECT sd.attendancestatus 
-                                                FROM mdl_attendance_student_detail sd, mdl_attendance_detail ad 
-                                                WHERE sd.attendancedetailid=ad.id 
-                                                AND ad.date=$dateunix 
-                                                AND sd.userid=$student->userid")->attendancestatus);
-    }
-    $table->data[] = $data;
-}
-echo html_writer::table($table);
 
-echo '</div>
-</div>';
 
 // Finish the page.
 echo $OUTPUT->footer();
+
