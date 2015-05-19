@@ -13,7 +13,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 /**
  * Prints a particular instance of attendance
  *
@@ -24,15 +23,11 @@
  * @copyright  2015 Your Name
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 // Replace attendance with the name of your module and remove this line.
-
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 require_once(dirname(__FILE__).'/lib.php');
-
 $id = optional_param('id', 0, PARAM_INT); // Course_module ID, or
 $n  = optional_param('n', 0, PARAM_INT);  // ... attendance instance ID - it should be named as the first character of the module.
-
 if ($id) {
     $cm         = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
     $course     = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
@@ -44,9 +39,7 @@ if ($id) {
 } else {
     error('You must specify a course_module ID or an instance ID');
 }
-
 require_login($course, true, $cm);
-
 $event = \mod_attendance\event\course_module_viewed::create(array(
     'objectid' => $PAGE->cm->instance,
     'context' => $PAGE->context,
@@ -54,52 +47,68 @@ $event = \mod_attendance\event\course_module_viewed::create(array(
 $event->add_record_snapshot('course', $PAGE->course);
 $event->add_record_snapshot($PAGE->cm->modname, $attendance);
 $event->trigger();
-
 // Print the page header.
-
-$PAGE->set_url('/mod/attendance/view.php', array('id' => $cm->id));
+$PAGE->set_url('/mod/attendance/passattendance.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($attendance->name));
 $PAGE->set_heading(format_string($course->fullname));
-
 /*
  * Other things you may want to set - remove if not needed.
  * $PAGE->set_cacheable(false);
  * $PAGE->set_focuscontrol('some-html-id');
  * $PAGE->add_body_class('attendance-'.$somevar);
  */
-
 // Output starts here.
 echo $OUTPUT->header();
-
 // Conditions to show the intro can change to look for own settings or whatever.
 if ($attendance->intro) {
     echo $OUTPUT->box(format_module_intro('attendance', $attendance, $cm->id), 'generalbox mod_introbox', 'attendanceintro');
 }
-
 // Replace the following lines with you own code.
 // Get current day, month and year for current user.
-
 // Print formatted date in user time.
 // Look the list of joins to know what are the expression u, c, e, ue, ra and ct
-
-//echo $OUTPUT->heading('Yay! It works!');
-
-// This function shows me my rol in this course
-if(my_role($COURSE, $USER)=="teacher")
-    redirect('teacher.php?id='.$id);
-else if(my_role($COURSE, $USER)=="student")
-    redirect('student.php?id='.$id);
-else
-    echo my_role($COURSE, $USER);
-
-
-// If a student go inside this page, he/she is going to redirct to student.php, because he/she wants to mark him/her attendance
-if(is_a_student($COURSE, $USER)){
-    redirect('student.php?id='.$id);
+$sql=  "SELECT DISTINCT u.id AS userid, c.id AS courseid
+        FROM mdl_user u
+        JOIN mdl_user_enrolments ue ON ue.userid = u.id
+        JOIN mdl_enrol e ON e.id = ue.enrolid
+        JOIN mdl_role_assignments ra ON ra.userid = u.id
+        JOIN mdl_context ct ON ct.id = ra.contextid AND ct.contextlevel = 50
+        JOIN mdl_course c ON c.id = ct.instanceid AND e.courseid = c.id
+        JOIN mdl_role r ON r.id = ra.roleid AND r.shortname = 'student'
+        WHERE e.status = 0 AND u.suspended = 0 AND u.deleted = 0
+        AND (ue.timeend = 0 OR ue.timeend > NOW()) AND ue.status = 0
+        AND c.id = $attendance->course";
+$students = $DB->get_records_sql($sql);
+echo $OUTPUT->heading('Pass attendance');
+$table = new html_table();
+$table->head = array('First Name','Last Name', 'Attedance');
+foreach ($students as $student) {
+    $name = $DB->get_record_sql("SELECT u.firstname, u.lastname, u.id FROM mdl_user u WHERE u.id = $student->userid");
+    $table->data[] = array($name->firstname,$name->lastname, html_writer::empty_tag('input', array('type' => 'checkbox', 'name' => $student->userid)));
 }
-
+if(isset($_POST['enviado'])){
+    $time = time();
+    $records                        = new stdClass();
+    $records->attendanceid          = $attendance->id;
+    $records->attendancetipe        = 'by_teacher';
+    $records->date                  = $time;
+    $lastInsertId = $DB->insert_record('attendance_detail', $records);
+    
+    foreach ($students as $student) {
+        $records                        = new stdClass();
+        $records->attendancedetailid    = $lastInsertId;
+        $records->userid                = $student->userid;
+        $records->attendancestatus      = (isset($_POST[$student->userid])) ? "present" : "ausent";
+        $DB->insert_record('attendance_student_detail', $records);
+    }
+    redirect('teacher.php?id='.$id);
+}
+else{
+    echo html_writer::start_tag('form', array('action' => $PAGE->url, 'method' => 'post'));
+    echo html_writer::table($table);
+    echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'enviado', 'value' => 1));
+    echo html_writer::empty_tag('input', array('type' => 'submit', 'name' => 'enviar'));
+    echo html_writer::end_tag('form');
+}
 // Finish the page.
 echo $OUTPUT->footer();
-
-
-

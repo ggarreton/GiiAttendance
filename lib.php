@@ -465,25 +465,25 @@ function my_role($COURSE, $USER){
     if(is_array($id_role)){
         foreach ($id_role as $key => $value) {
             if($value == 3){
-                $message="I'm a teacher";
+                $message="teacher";
             }elseif ($value == 5) {
-                $message="I'm a student";
+                $message="student";
             }else{
-                $message="I'm not a teacher or a student";
+                $message="You need to log in as a Teacher or Student to use this feature.";
             }        
         }
     }else{
         if($id_role == 3){
-            $message="I'm a teacher";
+            $message="teacher";
         }elseif ($id_role == 5) {
-            $message="I'm a student";
+            $message="student";
         }else{
-            $message="I'm not a teacher or a student";
+            $message="You need to log in as a Teacher or Student to use this feature.";
         }
     }
 
     // Show the message
-    echo $message;
+    return $message;
 
 }
 
