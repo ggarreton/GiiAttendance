@@ -96,7 +96,7 @@ echo'<ul class="nav nav-tabs">
 <div class="tab-pane" id="tab1">';
 echo '<ul class="nav nav-pills nav-stacked">
   <li role="presentation"><a href="passattendance.php?id='.$id.'">Take Attendance</a></li>
-  <li role="presentation"><a href="teacher.php?id='.$id.'">Students Mark Assistance</a></li>
+  <li role="presentation"><a href="teacher.php?id='.$id.'">Students Mark Attendance</a></li>
 </ul>';
 echo'</div>
 <div class="tab-pane active" id="tab2">';
