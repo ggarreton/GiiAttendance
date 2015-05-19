@@ -93,6 +93,11 @@ else
     echo my_role($COURSE, $USER);
 
 
+// If a student go inside this page, he/she is going to redirct to student.php, because he/she wants to mark him/her attendance
+if(is_a_student($COURSE, $USER)){
+    redirect('student.php?id='.$id);
+}
+
 // Finish the page.
 echo $OUTPUT->footer();
 
