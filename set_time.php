@@ -48,7 +48,7 @@ $event->add_record_snapshot('course', $PAGE->course);
 $event->add_record_snapshot($PAGE->cm->modname, $attendance);
 $event->trigger();
 // Print the page header.
-$PAGE->set_url('/mod/attendance/teacher.php', array('id' => $cm->id));
+$PAGE->set_url('/mod/attendance/set_time.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($attendance->name));
 $PAGE->set_heading(format_string($course->fullname));
 /*
@@ -135,6 +135,7 @@ if(is_a_teacher($COURSE, $USER)){
             
             $make_all_students_absent = $DB->insert_record('attendance_student_detail', $record_absent);        //echo $id_attendance;
         }
+        redirect('view.php?id='.$id);
         
     } else {
         $mform->display();
