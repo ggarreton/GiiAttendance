@@ -48,7 +48,7 @@ $event->add_record_snapshot('course', $PAGE->course);
 $event->add_record_snapshot($PAGE->cm->modname, $attendance);
 $event->trigger();
 // Print the page header.
-$PAGE->set_url('/mod/attendance/set_time.php', array('id' => $cm->id));
+$PAGE->set_url('/mod/attendance/teacher2.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($attendance->name));
 $PAGE->set_heading(format_string($course->fullname));
 /*
@@ -82,67 +82,19 @@ $sql_dates="SELECT date
 
 $students = $DB->get_records_sql( $sql);
 $dates= $DB->get_records_sql( $sql_dates);
+$array= array('Student');
 
-
-
-
-
-
-
-
-if(is_a_teacher($COURSE, $USER)){
-    $mform = new simplehtml_form($PAGE->url);
-    // array('start_time' => $start_time, 'end_time' => $end_time)
-    if($mform->get_data()) {
-        
-        // Recognice data from the form
-        $formdata = $mform->get_data();
-        
-        // Obteining times in UNIX from the form
-        $start_time         = $formdata->start_of_time;
-        $end_time           = $formdata->end_of_time;
-        
-        // The table structure is:
-        // __________________________________________________________________
-        // | id | attendanceid | attendancetipe | date | starttime | endtime |
-        // Creating one file to insert in the DB with their attributes
-        $records                        = new stdClass();
-        $records->attendanceid          = $attendance->id;
-        $records->attendancetipe        = 'by_students';
-        // The date is not the timestamp of the day at 00:00, the date is the actual time in UNIX
-        $records->date                  = time();
-        $records->starttime             = $start_time;
-        $records->endtime               = $end_time;
-        // insert_record('name_of_the_table', 'values_to_insert')
-        // You must ommit 'mdl_', because by default is added
-        $lastinsertid = $DB->insert_record('attendance_detail', $records);        //echo $id_attendance;
-        
-        $id_current_attendance = $DB->get_record_sql("SELECT id 
-            FROM mdl_attendance_detail 
-            WHERE attendanceid = $attendance->id
-            ORDER BY id DESC
-            LIMIT 1");
-        // The table structure is:
-        // _______________________________________________________
-        // | id | attendancedetailid | userid | attendancestatus |
-        foreach ($students as $student) {
-            $record_absent->attendancedetailid      = $id_current_attendance->id;
-            $record_absent->userid                  = $student->userid;
-            $record_absent->attendancestatus        = 'Absent';
-            
-            $make_all_students_absent = $DB->insert_record('attendance_student_detail', $record_absent);        //echo $id_attendance;
-        }
-        redirect('view.php?id='.$id);
-        
-    } else {
-        $mform->display();
-    }
+foreach ($dates as $date) {
+    array_push($array, usergetdate($date->date)["mday"]."-".usergetdate($date->date)["month"]);
 }
+array_push($array, '% Attendance');
 
-
-
-
-
-// Finish the page.
+echo'<ul class="nav nav-tabs">
+<li class="active"><a href="teacher2.php?id='.$id.'">Take Attendance</a></li>
+<li><a href="teacher.php?id='.$id.'">Attendance Review</a></li>
+</ul>';
+echo '<ul class="nav nav-pills nav-stacked">
+  <li role="presentation"><a href="passattendance.php?id='.$id.'">Take Attendance</a></li>
+  <li role="presentation"><a href="set_time.php?id='.$id.'">Students Mark Attendances</a></li>
+</ul>';
 echo $OUTPUT->footer();
-

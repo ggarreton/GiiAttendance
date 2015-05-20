@@ -98,7 +98,7 @@ if(isset($_POST['enviado'])){
         $records                        = new stdClass();
         $records->attendancedetailid    = $lastInsertId;
         $records->userid                = $student->userid;
-        $records->attendancestatus      = (isset($_POST[$student->userid])) ? "present" : "ausent";
+        $records->attendancestatus      = (isset($_POST[$student->userid])) ? "Present" : "Absent";
         $DB->insert_record('attendance_student_detail', $records);
     }
     redirect('teacher.php?id='.$id);

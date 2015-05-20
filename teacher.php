@@ -93,18 +93,10 @@ foreach ($dates as $date) {
 array_push($array, '% Attendance');
 
 echo'<ul class="nav nav-tabs">
-<li><a href="#tab1" data-toggle="tab">Take Attendance</a></li>
-<li class="active"><a href="#tab2" data-toggle="tab">Attendance Review</a></li>
-</ul>
-<!-- tab section -->
-<div class="tab-content">
-<div class="tab-pane" id="tab1">';
-echo '<ul class="nav nav-pills nav-stacked">
-  <li role="presentation"><a href="passattendance.php?id='.$id.'">Take Attendance</a></li>
-  <li role="presentation"><a href="teacher.php?id='.$id.'">Students Mark Attendances</a></li>
+<li><a href="teacher2.php?id='.$id.'">Take Attendance</a></li>
+<li class="active"><a href="teacher.php?id='.$id.'">Attendance Review</a></li>
 </ul>';
-echo'</div>
-<div class="tab-pane active" id="tab2">';
+
 
 echo $OUTPUT->heading('Students Attendances');
 
@@ -146,7 +138,7 @@ foreach ($students as $student) {
     }
     $cont = 0;
     $mean = $npresent/($npresent+$nabsent);
-    array_push($data, 100*$mean.'%');
+    array_push($data, percentage($mean));
     $table->data[] = $data;
     $npresent = 0;
     $nabsent = 0;
@@ -155,7 +147,7 @@ foreach ($students as $student) {
 $data=array('');
 foreach($dates as $date){ 
     $mean_day[$cont] = $npresent_day[$cont]/($npresent_day[$cont]+$nabsent_day[$cont]);
-    array_push($data, 100*$mean_day[$cont].'%');
+    array_push($data, percentage($mean_day[$cont]));
     $cont++;
 }
 array_push($data, '');
@@ -163,9 +155,6 @@ $table->data[] = $data;
 
 
 echo html_writer::table($table);
-
-echo '</div>
-</div>';
 
 // Finish the page.
 echo $OUTPUT->footer();

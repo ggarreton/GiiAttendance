@@ -52,12 +52,9 @@ $PAGE->set_heading(format_string($course->fullname));
 echo $OUTPUT->header();
 // Conditions to show the intro can change to look for own settings or whatever.
 echo'<ul class="nav nav-tabs">
-<li><a href="#tab1" data-toggle="tab">Mark Attendance</a></li>
-<li class="active"><a href="#tab2" data-toggle="tab">My Attendances</a></li>
-</ul>
-<!-- tab section -->
-<div class="tab-content">
-<div class="tab-pane" id="tab1">';
+<li><a href="student2.php?id='.$id.'">Mark Attendance</a></li>
+<li class="active"><a href="student.php?id='.$id.'">My Attendances</a></li>
+</ul>';
 
 if ($attendance->intro) {
     echo $OUTPUT->box(format_module_intro('attendance', $attendance, $cm->id), 'generalbox mod_introbox', 'attendanceintro');
@@ -67,58 +64,8 @@ if ($attendance->intro) {
 // Get current day, month and year for current user.
 
 //Only the student can mark as a present
-if(is_a_student($COURSE, $USER)){
-	$sql = "SELECT starttime, endtime, id
-	FROM mdl_attendance_detail
-	WHERE attendanceid = $attendance->id
-	AND starttime < UNIX_TIMESTAMP(NOW( ))
-	AND endtime > UNIX_TIMESTAMP(NOW( )) ";
 
-	$range_of_time = $DB->get_record_sql( $sql );
-
-	$start_of_time = $range_of_time->sTime;
-	$end_of_time = $range_of_time->eTime;
-
-	// If the student is on time to mark the attendance
-	if( $sql!=null || $sql!='' || $sql!=array('', '') || $sql!=array(null, null) && $end_of_time>time() ){
-		$pform = new present_form($PAGE->url);
-
-		if($pform->get_data()) {
         
-            $id_current_attendance = $DB->get_record_sql("SELECT id 
-            FROM mdl_attendance_detail 
-            WHERE attendanceid = $attendance->id
-            ORDER BY id DESC
-            LIMIT 1");
-
-            // The table structure is:
-            // _______________________________________________________
-            // | id | attendancedetailid | userid | attendancestatus |
-
-            $sql2 = "SELECT id 
-            FROM mdl_attendance_student_detail 
-            WHERE attendancedetailid = $id_current_attendance->id
-            AND userid = $USER->id";
-
-            $attendance_user_id = $DB->get_record_sql( $sql2 );
-
-        	// Creating one file to insert in the DB with their attributes
-        	$records                        	= new stdClass();
-        	$records->id            	    	= $attendance_user_id->id;
-        	$records->attendancestatus  	    = 'Present';
-        	// The date is not the timestamp of the day at 00:00, the date is the actual time in UNIX
-        	
-	        // insert_record('name_of_the_table', 'values_to_insert')
-        	// You must ommit 'mdl_', because by default is added
-    	    $lastinsertid = $DB->update_record('attendance_student_detail', $records);        //echo $id_attendance;
-        
-        
-	    } else {
-
-        	$pform->display();
-    	}
-    }
-		
     $nabsent = 0;
     $npresent = 0;
     // Adding the table of the historical records of attendance for this student
@@ -144,14 +91,11 @@ if(is_a_student($COURSE, $USER)){
     }
 
     $mean = $npresent/($npresent+$nabsent);
-    $table->data[] = array('% Attendance', 100*$mean.'%');
+    $table->data[] = array('% Attendance', percentage($mean));
     $table->data[] = array('Absents', $nabsent);
-    echo '</div>
-    <div class="tab-pane active" id="tab2">';
-    echo html_writer::table($table);        
-    echo '</div></div>';
-	
-}
+    echo html_writer::table($table);    
+    
+
 
 // Finish the page.
 echo $OUTPUT->footer();
