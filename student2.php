@@ -52,8 +52,8 @@ $PAGE->set_heading(format_string($course->fullname));
 echo $OUTPUT->header();
 // Conditions to show the intro can change to look for own settings or whatever.
 echo'<ul class="nav nav-tabs">
-<li><a href="student2.php?id='.$id.'">Mark Attendance</a></li>
-<li class="active"><a href="student.php?id='.$id.'">My Attendances</a></li>
+<li class="active"><a href="student2.php?id='.$id.'">Mark Attendance</a></li>
+<li><a href="student.php?id='.$id.'">My Attendances</a></li>
 </ul>';
 
 if ($attendance->intro) {
@@ -64,38 +64,55 @@ if ($attendance->intro) {
 // Get current day, month and year for current user.
 
 //Only the student can mark as a present
+if(is_a_student($COURSE, $USER)){
+	$sql = "SELECT starttime, endtime, id
+	FROM mdl_attendance_detail
+	WHERE attendanceid = $attendance->id
+	AND starttime < UNIX_TIMESTAMP(NOW( ))
+	AND endtime > UNIX_TIMESTAMP(NOW( )) ";
 
+	$range_of_time = $DB->get_records_sql( $sql );
+	// If the student is on time to mark the attendance
+	if( $range_of_time!=null){
+		$pform = new present_form($PAGE->url);
+
+		if($pform->get_data()) {
         
-    $nabsent = 0;
-    $npresent = 0;
-    // Adding the table of the historical records of attendance for this student
-    $table = new html_table();
-    $sql_dates = "SELECT date, id
-    FROM mdl_attendance_detail
-    WHERE attendanceid = $attendance->id";
+            $id_current_attendance = $DB->get_record_sql("SELECT id 
+            FROM mdl_attendance_detail 
+            WHERE attendanceid = $attendance->id
+            ORDER BY id DESC
+            LIMIT 1");
 
-    $dates = $DB->get_records_sql( $sql_dates );
+            // The table structure is:
+            // _______________________________________________________
+            // | id | attendancedetailid | userid | attendancestatus |
 
-    $table->head = array('Date','Status');
+            $sql2 = "SELECT id 
+            FROM mdl_attendance_student_detail 
+            WHERE attendancedetailid = $id_current_attendance->id
+            AND userid = $USER->id";
 
-    // Select the full name of the users that have the rol student in this course
-    foreach ($dates as $date) {
-        $status = $DB->get_record_sql("SELECT attendancestatus FROM mdl_attendance_student_detail 
-                                        WHERE userid = $USER->id AND attendancedetailid = $date->id");
-        if($student->attendancestatus == 'Absent'){
-            $nabsent++;
-        }else{
-            $npresent++;
-        }
-        $table->data[] = array(usergetdate($date->date)['mday'].'-'.usergetdate($date->date)['month'], $status->attendancestatus);
+            $attendance_user_id = $DB->get_record_sql( $sql2 );
+
+        	// Creating one file to insert in the DB with their attributes
+        	$records                        	= new stdClass();
+        	$records->id            	    	= $attendance_user_id->id;
+        	$records->attendancestatus  	    = 'Present';
+        	// The date is not the timestamp of the day at 00:00, the date is the actual time in UNIX
+        	
+	        // insert_record('name_of_the_table', 'values_to_insert')
+        	// You must ommit 'mdl_', because by default is added
+    	    $lastinsertid = $DB->update_record('attendance_student_detail', $records);        //echo $id_attendance;
+        
+        
+	    } else {
+
+        	$pform->display();
+    	}
     }
-
-    $mean = $npresent/($npresent+$nabsent);
-    $table->data[] = array('% Attendance', 100*$mean.'%');
-    $table->data[] = array('Absents', $nabsent);
-    echo html_writer::table($table);    
-    
-
+	
+}
 
 // Finish the page.
 echo $OUTPUT->footer();

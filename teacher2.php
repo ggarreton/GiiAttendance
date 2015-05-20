@@ -48,7 +48,7 @@ $event->add_record_snapshot('course', $PAGE->course);
 $event->add_record_snapshot($PAGE->cm->modname, $attendance);
 $event->trigger();
 // Print the page header.
-$PAGE->set_url('/mod/attendance/teacher.php', array('id' => $cm->id));
+$PAGE->set_url('/mod/attendance/teacher2.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($attendance->name));
 $PAGE->set_heading(format_string($course->fullname));
 /*
@@ -93,68 +93,11 @@ foreach ($dates as $date) {
 array_push($array, '% Attendance');
 
 echo'<ul class="nav nav-tabs">
-<li><a href="teacher2.php?id='.$id.'">Take Attendance</a></li>
-<li class="active"><a href="teacher.php?id='.$id.'">Attendance Review</a></li>
+<li class="active"><a href="teacher2.php?id='.$id.'">Take Attendance</a></li>
+<li><a href="teacher.php?id='.$id.'">Attendance Review</a></li>
 </ul>';
-
-
-echo $OUTPUT->heading('Students Attendances');
-
-$npresent = 0;
-$nabsent = 0;
-$npresent_day = array();
-$nabsent_day = array();
-$cont = 0;
-
-foreach ($students as $student) {
-    $npresent_day[$cont] = 0;
-    $nabsent_day[$cont] = 0;
-    $cont++;
-}
-$cont = 0;
-
-$table = new html_table();
-$table->head = $array;
-foreach ($students as $student) {
-    $name = $DB->get_record_sql("SELECT u.firstname, u.lastname FROM mdl_user u WHERE u.id = $student->userid");
-    $data=array($name->firstname." ".$name->lastname);
-    foreach($dates as $date){   
-        $dateunix=usergetdate($date->date)[0]; 
-        $sql_status =  "SELECT sd.attendancestatus 
-                        FROM mdl_attendance_student_detail sd, mdl_attendance_detail ad 
-                        WHERE sd.attendancedetailid=ad.id 
-                        AND ad.date=$dateunix 
-                        AND sd.userid=$student->userid";
-        $attendancestatus = $DB->get_record_sql( $sql_status )->attendancestatus;
-        array_push($data, $attendancestatus);
-        if($attendancestatus == "Absent"){
-            $nabsent++;
-            $nabsent_day[$cont]++;
-        }else{
-            $npresent++;
-            $npresent_day[$cont]++;
-        }
-        $cont++;
-    }
-    $cont = 0;
-    $mean = $npresent/($npresent+$nabsent);
-    array_push($data, 100*$mean.'%');
-    $table->data[] = $data;
-    $npresent = 0;
-    $nabsent = 0;
-
-}
-$data=array('');
-foreach($dates as $date){ 
-    $mean_day[$cont] = $npresent_day[$cont]/($npresent_day[$cont]+$nabsent_day[$cont]);
-    array_push($data, 100*$mean_day[$cont].'%');
-    $cont++;
-}
-array_push($data, '');
-$table->data[] = $data;
-
-
-echo html_writer::table($table);
-
-// Finish the page.
+echo '<ul class="nav nav-pills nav-stacked">
+  <li role="presentation"><a href="passattendance.php?id='.$id.'">Take Attendance</a></li>
+  <li role="presentation"><a href="set_time.php?id='.$id.'">Students Mark Attendances</a></li>
+</ul>';
 echo $OUTPUT->footer();
