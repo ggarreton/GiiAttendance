@@ -117,39 +117,39 @@ if(is_a_student($COURSE, $USER)){
 
         	$pform->display();
     	}
-        }
+    }
 		
-        $nabsent = 0;
-        $npresent = 0;
-        // Adding the table of the historical records of attendance for this student
-        $table = new html_table();
-        $sql_dates = "SELECT date, id
-        FROM mdl_attendance_detail
-        WHERE attendanceid = $attendance->id";
+    $nabsent = 0;
+    $npresent = 0;
+    // Adding the table of the historical records of attendance for this student
+    $table = new html_table();
+    $sql_dates = "SELECT date, id
+    FROM mdl_attendance_detail
+    WHERE attendanceid = $attendance->id";
 
-        $dates = $DB->get_records_sql( $sql_dates );
+    $dates = $DB->get_records_sql( $sql_dates );
 
-        $table->head = array('Date','Status');
+    $table->head = array('Date','Status');
 
-        // Select the full name of the users that have the rol student in this course
-        foreach ($dates as $date) {
-            $status = $DB->get_record_sql("SELECT attendancestatus FROM mdl_attendance_student_detail 
-                WHERE userid = $USER->id AND attendancedetailid = $date->id");
-            if($student->attendancestatus == 'Absent'){
-                $nabsent++;
-            }else{
-                $npresent++;
-            }
-            $table->data[] = array(usergetdate($date->date)['mday'].'-'.usergetdate($date->date)['month'], $status->attendancestatus);
+    // Select the full name of the users that have the rol student in this course
+    foreach ($dates as $date) {
+        $status = $DB->get_record_sql("SELECT attendancestatus FROM mdl_attendance_student_detail 
+                                        WHERE userid = $USER->id AND attendancedetailid = $date->id");
+        if($student->attendancestatus == 'Absent'){
+            $nabsent++;
+        }else{
+            $npresent++;
         }
+        $table->data[] = array(usergetdate($date->date)['mday'].'-'.usergetdate($date->date)['month'], $status->attendancestatus);
+    }
 
-        $mean = $npresent/($npresent+$nabsent);
-        $table->data[] = array('% Attendance', 100*$mean.'%');
-        $table->data[] = array('Absents', $nabsent);
-echo '</div>
-<div class="tab-pane active" id="tab2">';
-        echo html_writer::table($table);        
-echo '</div></div>';
+    $mean = $npresent/($npresent+$nabsent);
+    $table->data[] = array('% Attendance', 100*$mean.'%');
+    $table->data[] = array('Absents', $nabsent);
+    echo '</div>
+    <div class="tab-pane active" id="tab2">';
+    echo html_writer::table($table);        
+    echo '</div></div>';
 	
 }
 

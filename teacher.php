@@ -90,54 +90,7 @@ $array= array('Student');
 foreach ($dates as $date) {
     array_push($array, usergetdate($date->date)["mday"]."-".usergetdate($date->date)["month"]);
 }
-
-if(is_a_teacher($COURSE, $USER)){
-    $mform = new simplehtml_form($PAGE->url);
-    // array('start_time' => $start_time, 'end_time' => $end_time)
-    if($mform->get_data()) {
-        
-        // Recognice data from the form
-        $formdata = $mform->get_data();
-        
-        // Obteining times in UNIX from the form
-        $start_time         = $formdata->start_of_time;
-        $end_time           = $formdata->end_of_time;
-        
-        // The table structure is:
-        // __________________________________________________________________
-        // | id | attendanceid | attendancetipe | date | starttime | endtime |
-        // Creating one file to insert in the DB with their attributes
-        $records                        = new stdClass();
-        $records->attendanceid          = $attendance->id;
-        $records->attendancetipe        = 'by_students';
-        // The date is not the timestamp of the day at 00:00, the date is the actual time in UNIX
-        $records->date                  = time();
-        $records->starttime             = $start_time;
-        $records->endtime               = $end_time;
-        // insert_record('name_of_the_table', 'values_to_insert')
-        // You must ommit 'mdl_', because by default is added
-        $lastinsertid = $DB->insert_record('attendance_detail', $records);        //echo $id_attendance;
-        
-        $id_current_attendance = $DB->get_record_sql("SELECT id 
-            FROM mdl_attendance_detail 
-            WHERE attendanceid = $attendance->id
-            ORDER BY id DESC
-            LIMIT 1");
-        // The table structure is:
-        // _______________________________________________________
-        // | id | attendancedetailid | userid | attendancestatus |
-        foreach ($students as $student) {
-            $record_absent->attendancedetailid      = $id_current_attendance->id;
-            $record_absent->userid                  = $student->userid;
-            $record_absent->attendancestatus        = 'Absent';
-            
-            $make_all_students_absent = $DB->insert_record('attendance_student_detail', $record_absent);        //echo $id_attendance;
-        }
-        
-    } else {
-        $mform->display();
-    }
-}
+array_push($array, '% Attendance');
 
 echo'<ul class="nav nav-tabs">
 <li><a href="#tab1" data-toggle="tab">Take Attendance</a></li>
@@ -155,21 +108,60 @@ echo'</div>
 
 echo $OUTPUT->heading('Students Attendances');
 
+$npresent = 0;
+$nabsent = 0;
+$npresent_day = array();
+$nabsent_day = array();
+$cont = 0;
+
+foreach ($students as $student) {
+    $npresent_day[$cont] = 0;
+    $nabsent_day[$cont] = 0;
+    $cont++;
+}
+$cont = 0;
+
 $table = new html_table();
 $table->head = $array;
 foreach ($students as $student) {
     $name = $DB->get_record_sql("SELECT u.firstname, u.lastname FROM mdl_user u WHERE u.id = $student->userid");
     $data=array($name->firstname." ".$name->lastname);
     foreach($dates as $date){   
-    $dateunix=usergetdate($date->date)[0]; 
-        array_push($data, $DB->get_record_sql( "SELECT sd.attendancestatus 
-                                                FROM mdl_attendance_student_detail sd, mdl_attendance_detail ad 
-                                                WHERE sd.attendancedetailid=ad.id 
-                                                AND ad.date=$dateunix 
-                                                AND sd.userid=$student->userid")->attendancestatus);
+        $dateunix=usergetdate($date->date)[0]; 
+        $sql_status =  "SELECT sd.attendancestatus 
+                        FROM mdl_attendance_student_detail sd, mdl_attendance_detail ad 
+                        WHERE sd.attendancedetailid=ad.id 
+                        AND ad.date=$dateunix 
+                        AND sd.userid=$student->userid";
+        $attendancestatus = $DB->get_record_sql( $sql_status )->attendancestatus;
+        array_push($data, $attendancestatus);
+        if($attendancestatus == "Absent"){
+            $nabsent++;
+            $nabsent_day[$cont]++;
+        }else{
+            $npresent++;
+            $npresent_day[$cont]++;
+        }
+        $cont++;
     }
+    $cont = 0;
+    $mean = $npresent/($npresent+$nabsent);
+    array_push($data, 100*$mean.'%');
     $table->data[] = $data;
+    $npresent = 0;
+    $nabsent = 0;
+
 }
+$data=array('');
+foreach($dates as $date){ 
+    $mean_day[$cont] = $npresent_day[$cont]/($npresent_day[$cont]+$nabsent_day[$cont]);
+    array_push($data, 100*$mean_day[$cont].'%');
+    $cont++;
+}
+array_push($data, '');
+$table->data[] = $data;
+
+
 echo html_writer::table($table);
 
 echo '</div>
