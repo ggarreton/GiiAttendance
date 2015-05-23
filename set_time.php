@@ -59,10 +59,7 @@ $PAGE->set_heading(format_string($course->fullname));
  */
 // Output starts here.
 echo $OUTPUT->header();
-// Conditions to show the intro can change to look for own settings or whatever.
-if ($attendance->intro) {
-    echo $OUTPUT->box(format_module_intro('attendance', $attendance, $cm->id), 'generalbox mod_introbox', 'attendanceintro');
-}
+
 // Replace the following lines with you own code.
 // Get current day, month and year for current user.
 // Print formatted date in user time.

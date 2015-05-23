@@ -22,7 +22,7 @@
  * if you like, and it can span multiple lines.
  *
  * @package    mod_attendance
- * @copyright  2015 Your Name
+ * @copyright  2015 GIA
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -40,3 +40,24 @@ $string['pluginname'] = 'attendance';
 $string['start_of_time'] = 'Start of time: ';
 $string['end_of_time'] = 'End of time: ';
 $string['button_save'] = 'Save';
+$string['teacher'] = 'teacher';
+$string['student'] = 'student';
+$string['error_message_not_teacher_not_student'] = "You need to log in as a Teacher or Student to use this feature.";
+$string['present'] = 'Present';
+$string['Present'] = $string['present'];
+$string['absent'] = 'Absent';
+$string['Absent'] = $string['absent'];
+$string['January'] = 'January';
+$string['February'] = 'February';
+$string['March'] = 'March';
+$string['April'] = 'April';
+$string['May'] = 'May';
+$string['June'] = 'June';
+$string['July'] = 'July';
+$string['August'] = 'August';
+$string['September'] = 'September';
+$string['October'] = 'October';
+$string['November'] = 'November';
+$string['December'] = 'December';
+
+

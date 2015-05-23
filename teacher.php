@@ -77,42 +77,33 @@ $sql=      "SELECT DISTINCT u.id AS userid, c.id AS courseid
             WHERE e.status = 0 AND u.suspended = 0 AND u.deleted = 0
             AND (ue.timeend = 0 OR ue.timeend > NOW()) AND ue.status = 0
             AND c.id = $attendance->course";
-
 $sql_dates="SELECT date
             FROM mdl_attendance_detail
             GROUP BY date
             ORDER BY date"; 
-
 $students = $DB->get_records_sql( $sql);
 $dates= $DB->get_records_sql( $sql_dates);
 $array= array('Student');
-
 foreach ($dates as $date) {
     array_push($array, usergetdate($date->date)["mday"]."-".usergetdate($date->date)["month"]);
 }
 array_push($array, '% Attendance');
-
 echo'<ul class="nav nav-tabs">
 <li><a href="teacher2.php?id='.$id.'">Take Attendance</a></li>
 <li class="active"><a href="teacher.php?id='.$id.'">Attendance Review</a></li>
 </ul>';
-
-
 echo $OUTPUT->heading('Students Attendances');
-
 $npresent = 0;
 $nabsent = 0;
 $npresent_day = array();
 $nabsent_day = array();
 $cont = 0;
-
 foreach ($students as $student) {
     $npresent_day[$cont] = 0;
     $nabsent_day[$cont] = 0;
     $cont++;
 }
 $cont = 0;
-
 $table = new html_table();
 $table->head = $array;
 foreach ($students as $student) {
@@ -138,23 +129,19 @@ foreach ($students as $student) {
     }
     $cont = 0;
     $mean = $npresent/($npresent+$nabsent);
-    array_push($data, 100*$mean.'%');
+    array_push($data, percentage($mean));
     $table->data[] = $data;
     $npresent = 0;
     $nabsent = 0;
-
 }
 $data=array('');
 foreach($dates as $date){ 
     $mean_day[$cont] = $npresent_day[$cont]/($npresent_day[$cont]+$nabsent_day[$cont]);
-    array_push($data, 100*$mean_day[$cont].'%');
+    array_push($data, percentage($mean_day[$cont]));
     $cont++;
 }
 array_push($data, '');
 $table->data[] = $data;
-
-
 echo html_writer::table($table);
-
 // Finish the page.
 echo $OUTPUT->footer();

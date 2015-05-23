@@ -465,20 +465,20 @@ function my_role($COURSE, $USER){
     if(is_array($id_role)){
         foreach ($id_role as $key => $value) {
             if($value == 3){
-                $message="teacher";
+                $message=get_string('teacher', 'mod_attendance');
             }elseif ($value == 5) {
-                $message="student";
+                $message=get_string('student', 'mod_attendance');
             }else{
-                $message="You need to log in as a Teacher or Student to use this feature.";
+                $message=get_string('error_message_not_teacher_not_student', 'mod_attendance');
             }        
         }
     }else{
         if($id_role == 3){
-            $message="teacher";
+            $message=get_string('teacher', 'mod_attendance');
         }elseif ($id_role == 5) {
-            $message="student";
+            $message=get_string('student', 'mod_attendance');
         }else{
-            $message="You need to log in as a Teacher or Student to use this feature.";
+            $message=get_string('error_message_not_teacher_not_student', 'mod_attendance');
         }
     }
 
@@ -569,8 +569,8 @@ class present_form extends moodleform {
  
         $mform =& $this->_form; // Don't forget the underscore!
 
-        $this->add_action_buttons( $cancel = false, $submitlabel='Present' );
-        $mform->closeHeaderBefore('present');
+        $this->add_action_buttons( $cancel = false, $submitlabel=get_string('present', 'mod_attendance') );
+        $mform->closeHeaderBefore( get_string('present', 'mod_attendance') );
 
     }                           // Close the function
 } 
@@ -584,7 +584,10 @@ function recording_information($name1, $value1){
     return $record;
 }
 
-
+function percentage($number){
+    $percentage = 100*$number.'%';
+    return $percentage;
+}
 
 
 

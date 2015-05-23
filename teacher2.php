@@ -59,10 +59,6 @@ $PAGE->set_heading(format_string($course->fullname));
  */
 // Output starts here.
 echo $OUTPUT->header();
-// Conditions to show the intro can change to look for own settings or whatever.
-if ($attendance->intro) {
-    echo $OUTPUT->box(format_module_intro('attendance', $attendance, $cm->id), 'generalbox mod_introbox', 'attendanceintro');
-}
 // Replace the following lines with you own code.
 // Get current day, month and year for current user.
 // Print formatted date in user time.
@@ -77,21 +73,17 @@ $sql=      "SELECT DISTINCT u.id AS userid, c.id AS courseid
             WHERE e.status = 0 AND u.suspended = 0 AND u.deleted = 0
             AND (ue.timeend = 0 OR ue.timeend > NOW()) AND ue.status = 0
             AND c.id = $attendance->course";
-
 $sql_dates="SELECT date
             FROM mdl_attendance_detail
             GROUP BY date
             ORDER BY date"; 
-
 $students = $DB->get_records_sql( $sql);
 $dates= $DB->get_records_sql( $sql_dates);
 $array= array('Student');
-
 foreach ($dates as $date) {
     array_push($array, usergetdate($date->date)["mday"]."-".usergetdate($date->date)["month"]);
 }
 array_push($array, '% Attendance');
-
 echo'<ul class="nav nav-tabs">
 <li class="active"><a href="teacher2.php?id='.$id.'">Take Attendance</a></li>
 <li><a href="teacher.php?id='.$id.'">Attendance Review</a></li>
