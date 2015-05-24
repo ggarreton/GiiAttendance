@@ -61,12 +61,6 @@ $PAGE->set_url('/mod/attendance/view.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($attendance->name));
 $PAGE->set_heading(format_string($course->fullname));
 
-/*
- * Other things you may want to set - remove if not needed.
- * $PAGE->set_cacheable(false);
- * $PAGE->set_focuscontrol('some-html-id');
- * $PAGE->add_body_class('attendance-'.$somevar);
- */
 
 // Output starts here.
 echo $OUTPUT->header();
@@ -76,27 +70,15 @@ if ($attendance->intro) {
     echo $OUTPUT->box(format_module_intro('attendance', $attendance, $cm->id), 'generalbox mod_introbox', 'attendanceintro');
 }
 
-// Replace the following lines with you own code.
-// Get current day, month and year for current user.
-
-// Print formatted date in user time.
-// Look the list of joins to know what are the expression u, c, e, ue, ra and ct
-
-//echo $OUTPUT->heading('Yay! It works!');
-
-// This function shows me my rol in this course
-if(my_role($COURSE, $USER)=="teacher")
+// The user is redirected according to his role in the course
+if(is_a_teacher($COURSE, $USER))
     redirect('teacher.php?id='.$id);
-else if(my_role($COURSE, $USER)=="student")
+else if(is_a_student($COURSE, $USER))
     redirect('student.php?id='.$id);
 else
     echo my_role($COURSE, $USER);
 
 
-// If a student go inside this page, he/she is going to redirct to student.php, because he/she wants to mark him/her attendance
-if(is_a_student($COURSE, $USER)){
-    redirect('student.php?id='.$id);
-}
 
 // Finish the page.
 echo $OUTPUT->footer();

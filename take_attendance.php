@@ -48,7 +48,7 @@ $event->add_record_snapshot('course', $PAGE->course);
 $event->add_record_snapshot($PAGE->cm->modname, $attendance);
 $event->trigger();
 // Print the page header.
-$PAGE->set_url('/mod/attendance/passattendance.php', array('id' => $cm->id));
+$PAGE->set_url('/mod/attendance/take_attendance.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($attendance->name));
 $PAGE->set_heading(format_string($course->fullname));
 /*
@@ -59,54 +59,59 @@ $PAGE->set_heading(format_string($course->fullname));
  */
 // Output starts here.
 echo $OUTPUT->header();
-// Conditions to show the intro can change to look for own settings or whatever.
-if ($attendance->intro) {
-    echo $OUTPUT->box(format_module_intro('attendance', $attendance, $cm->id), 'generalbox mod_introbox', 'attendanceintro');
-}
-// Replace the following lines with you own code.
-// Get current day, month and year for current user.
-// Print formatted date in user time.
-// Look the list of joins to know what are the expression u, c, e, ue, ra and ct
-$sql=  "SELECT DISTINCT u.id AS userid, c.id AS courseid
-        FROM mdl_user u
-        JOIN mdl_user_enrolments ue ON ue.userid = u.id
-        JOIN mdl_enrol e ON e.id = ue.enrolid
-        JOIN mdl_role_assignments ra ON ra.userid = u.id
-        JOIN mdl_context ct ON ct.id = ra.contextid AND ct.contextlevel = 50
-        JOIN mdl_course c ON c.id = ct.instanceid AND e.courseid = c.id
-        JOIN mdl_role r ON r.id = ra.roleid AND r.shortname = 'student'
-        WHERE e.status = 0 AND u.suspended = 0 AND u.deleted = 0
-        AND (ue.timeend = 0 OR ue.timeend > NOW()) AND ue.status = 0
-        AND c.id = $attendance->course";
-$students = $DB->get_records_sql($sql);
-echo $OUTPUT->heading('Pass attendance');
-$table = new html_table();
-$table->head = array('First Name','Last Name', 'Attedance');
-foreach ($students as $student) {
-    $name = $DB->get_record_sql("SELECT u.firstname, u.lastname, u.id FROM mdl_user u WHERE u.id = $student->userid");
-    $table->data[] = array($name->firstname,$name->lastname, html_writer::empty_tag('input', array('type' => 'checkbox', 'name' => $student->userid)));
-}
-if(isset($_POST['enviado'])){
-    $time = time();
-    $records                        = new stdClass();
-    $records->attendanceid          = $attendance->id;
-    $records->attendancetipe        = 'by_teacher';
-    $records->date                  = $time;
-    $lastInsertId = $DB->insert_record('attendance_detail', $records);
+
+// If the user is not a teacher redirects to view.php
+if(!is_a_teacher($COURSE, $USER))
+    die(redirect('view.php?id='.$id));
+
+$sqlStudents=  "SELECT DISTINCT u.id AS userid, u.firstname, u.lastname
+            FROM mdl_user u
+            JOIN mdl_user_enrolments ue ON ue.userid = u.id
+            JOIN mdl_enrol e ON e.id = ue.enrolid
+            JOIN mdl_role_assignments ra ON ra.userid = u.id
+            JOIN mdl_context ct ON ct.id = ra.contextid AND ct.contextlevel = 50
+            JOIN mdl_course c ON c.id = ct.instanceid AND e.courseid = c.id
+            JOIN mdl_role r ON r.id = ra.roleid AND r.shortname = 'student'
+            WHERE e.status = 0 AND u.suspended = 0 AND u.deleted = 0
+            AND (ue.timeend = 0 OR ue.timeend > NOW()) AND ue.status = 0
+            AND c.id = $attendance->course";
+// Get the user id of all the students of the course
+$students = $DB->get_records_sql($sqlStudents);
+
+// Verify if the hidden input was send
+if(optional_param('enviado',null, PARAM_INTEGER)!=null){
+    // Create a new attendance entry in the DB
+    $attendanceRecords                  = new stdClass();
+    $attendanceRecords->attendanceid    = $attendance->id;
+    $attendanceRecords->attendancetipe  = 'by_teacher';
+    // Save the current unix time as the date param of the record
+    $attendanceRecords->date            = time(   );
+    // Insert record in the DB sabing the record id in a variable
+    $lastInsertId                       = $DB->insert_record('attendance_detail', $attendanceRecords);
     
     foreach ($students as $student) {
-        $records                        = new stdClass();
-        $records->attendancedetailid    = $lastInsertId;
-        $records->userid                = $student->userid;
-        $records->attendancestatus      = (isset($_POST[$student->userid])) ? "Present" : "Absent";
-        $DB->insert_record('attendance_student_detail', $records);
+        $StudentRecords                        = new stdClass();
+        $StudentRecords->attendancedetailid    = $lastInsertId;
+        $StudentRecords->userid                = $student->userid;
+        // Verify if there is integer key where the user is saved in the param requested, if so, Saves a Present "attendancestatus" otherwise a Absent
+        $StudentRecords->attendancestatus      = (is_int(array_search($student->userid,optional_param_array('publish',null, PARAM_INTEGER))))? "Present" : "Absent";
+        $DB->insert_record('attendance_student_detail', $StudentRecords);
     }
+    // After inserting all the records, return to teacher.php
     redirect('teacher.php?id='.$id);
 }
 else{
+    echo $OUTPUT->heading('Pass attendance');
+    $table = new html_table();
+    $table->head = array('First Name','Last Name', 'Attedance');
+    foreach ($students as $student) {
+        // insert a row for the given student telling the student name, lastname and a checkbox
+        $table->data[] = array($student->firstname,$student->lastname, html_writer::empty_tag('input', array('type' => 'checkbox', 'name'=>"publish[]" ,'value' => $student->userid)));
+    }
     echo html_writer::start_tag('form', array('action' => $PAGE->url, 'method' => 'post'));
     echo html_writer::table($table);
-    echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'enviado', 'value' => 1));
+    // Input send to verify if there is data to insert in the DB
+    echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'enviado', 'value' => '1'));
     echo html_writer::empty_tag('input', array('type' => 'submit', 'name' => 'enviar'));
     echo html_writer::end_tag('form');
 }

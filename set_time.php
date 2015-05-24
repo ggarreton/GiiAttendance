@@ -29,13 +29,13 @@ require_once(dirname(__FILE__).'/lib.php');
 $id = optional_param('id', 0, PARAM_INT); // Course_module ID, or
 $n  = optional_param('n', 0, PARAM_INT);  // ... attendance instance ID - it should be named as the first character of the module.
 if ($id) {
-    $cm         = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
-    $course     = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-    $attendance  = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
+    $cm             = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
+    $course         = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
+    $attendance     = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
 } else if ($n) {
-    $attendance  = $DB->get_record('attendance', array('id' => $n), '*', MUST_EXIST);
-    $course     = $DB->get_record('course', array('id' => $attendance->course), '*', MUST_EXIST);
-    $cm         = get_coursemodule_from_instance('attendance', $attendance->id, $course->id, false, MUST_EXIST);
+    $attendance     = $DB->get_record('attendance', array('id' => $n), '*', MUST_EXIST);
+    $course         = $DB->get_record('course', array('id' => $attendance->course), '*', MUST_EXIST);
+    $cm             = get_coursemodule_from_instance('attendance', $attendance->id, $course->id, false, MUST_EXIST);
 } else {
     error('You must specify a course_module ID or an instance ID');
 }
@@ -60,88 +60,93 @@ $PAGE->set_heading(format_string($course->fullname));
 // Output starts here.
 echo $OUTPUT->header();
 
+// If the user is not a teacher redirects to view.php
+if(!is_a_teacher($COURSE, $USER))
+    die(redirect('view.php?id='.$id));
+
 // Replace the following lines with you own code.
 // Get current day, month and year for current user.
 // Print formatted date in user time.
-$sql=      "SELECT DISTINCT u.id AS userid, c.id AS courseid
-            FROM mdl_user u
-            JOIN mdl_user_enrolments ue ON ue.userid = u.id
-            JOIN mdl_enrol e ON e.id = ue.enrolid
-            JOIN mdl_role_assignments ra ON ra.userid = u.id
-            JOIN mdl_context ct ON ct.id = ra.contextid AND ct.contextlevel = 50
-            JOIN mdl_course c ON c.id = ct.instanceid AND e.courseid = c.id
-            JOIN mdl_role r ON r.id = ra.roleid AND r.shortname = 'student'
-            WHERE e.status = 0 AND u.suspended = 0 AND u.deleted = 0
-            AND (ue.timeend = 0 OR ue.timeend > NOW()) AND ue.status = 0
-            AND c.id = $attendance->course";
+$sqlStudents=  "SELECT DISTINCT u.id AS userid
+                FROM mdl_user u
+                JOIN mdl_user_enrolments ue ON ue.userid = u.id
+                JOIN mdl_enrol e ON e.id = ue.enrolid
+                JOIN mdl_role_assignments ra ON ra.userid = u.id
+                JOIN mdl_context ct ON ct.id = ra.contextid AND ct.contextlevel = 50
+                JOIN mdl_course c ON c.id = ct.instanceid AND e.courseid = c.id
+                JOIN mdl_role r ON r.id = ra.roleid AND r.shortname = 'student'
+                WHERE e.status = 0 AND u.suspended = 0 AND u.deleted = 0
+                AND (ue.timeend = 0 OR ue.timeend > NOW()) AND ue.status = 0
+                AND c.id = $attendance->course";
 
-$sql_dates="SELECT date
-            FROM mdl_attendance_detail
-            GROUP BY date
-            ORDER BY date"; 
+$sqlDates   =  "SELECT date
+                FROM mdl_attendance_detail
+                GROUP BY date
+                ORDER BY date"; 
 
-$students = $DB->get_records_sql( $sql);
-$dates= $DB->get_records_sql( $sql_dates);
-
-
+$students   = $DB->get_records_sql( $sqlStudents);
+$dates      = $DB->get_records_sql( $sqlDates);
 
 
-
-
-
-
-if(is_a_teacher($COURSE, $USER)){
-    $mform = new simplehtml_form($PAGE->url);
-    // array('start_time' => $start_time, 'end_time' => $end_time)
-    if($mform->get_data()) {
-        
-        // Recognice data from the form
-        $formdata = $mform->get_data();
-        
-        // Obteining times in UNIX from the form
-        $start_time         = $formdata->start_of_time;
-        $end_time           = $formdata->end_of_time;
-        
-        // The table structure is:
-        // __________________________________________________________________
-        // | id | attendanceid | attendancetipe | date | starttime | endtime |
-        // Creating one file to insert in the DB with their attributes
-        $records                        = new stdClass();
-        $records->attendanceid          = $attendance->id;
-        $records->attendancetipe        = 'by_students';
-        // The date is not the timestamp of the day at 00:00, the date is the actual time in UNIX
-        $records->date                  = time();
-        $records->starttime             = $start_time;
-        $records->endtime               = $end_time;
-        // insert_record('name_of_the_table', 'values_to_insert')
-        // You must ommit 'mdl_', because by default is added
-        $lastinsertid = $DB->insert_record('attendance_detail', $records);        //echo $id_attendance;
-        
-        $id_current_attendance = $DB->get_record_sql("SELECT id 
-            FROM mdl_attendance_detail 
-            WHERE attendanceid = $attendance->id
-            ORDER BY id DESC
-            LIMIT 1");
-        // The table structure is:
-        // _______________________________________________________
-        // | id | attendancedetailid | userid | attendancestatus |
-        foreach ($students as $student) {
-            $record_absent->attendancedetailid      = $id_current_attendance->id;
-            $record_absent->userid                  = $student->userid;
-            $record_absent->attendancestatus        = 'Absent';
-            
-            $make_all_students_absent = $DB->insert_record('attendance_student_detail', $record_absent);        //echo $id_attendance;
-        }
-        redirect('view.php?id='.$id);
-        
-    } else {
-        $mform->display();
+$mform      = new simplehtml_form($PAGE->url);
+if($mform->get_data()) {
+    
+    // Recognice data from the form
+    $formdata                       = $mform->get_data();
+    // Creating one record to insert in the DB with their attributes
+    $records                        = new stdClass();
+    $records->attendanceid          = $attendance->id;
+    $records->attendancetipe        = 'by_students';
+    // The date is the actual time in UNIX
+    $records->date                  = time();
+    // Obteining times in UNIX from the form
+    $records->starttime             = $formdata->startTime;
+    $records->endtime               = $formdata->endTime;
+    $DB->insert_record('attendance_detail', $records);
+    
+    $currentAttendanceId            = $DB->get_record_sql( "SELECT id 
+                                                            FROM mdl_attendance_detail 
+                                                            WHERE attendanceid = $attendance->id
+                                                            ORDER BY id DESC
+                                                            LIMIT 1");
+    foreach ($students as $student) {
+        // Until the Student mark their attendance, by default they are listed as absent
+        $recordAbsent->attendancedetailid      = $currentAttendanceId->id;
+        $recordAbsent->userid                  = $student->userid;
+        $recordAbsent->attendancestatus        = 'Absent';
+        // Insert the status in the current student
+        $DB->insert_record('attendance_student_detail', $recordAbsent);
     }
+    // Once finish inserting in the DB redirect to view.php
+    redirect('view.php?id='.$id);
+    
+} else {
+    $mform->display();
+?>
+<!-- Style to hide the year, month and dey of the date selector-->
+<style>
+select#id_startTime_day{
+display: none
 }
-
-
-
-
+select#id_startTime_month{
+display: none
+}
+select#id_startTime_year{
+display: none
+}
+select#id_endTime_day{
+display: none
+}
+select#id_endTime_month{
+display: none
+}
+select#id_endTime_year{
+display: none
+}
+}
+</style>
+<?php
+}
 
 // Finish the page.
 echo $OUTPUT->footer();

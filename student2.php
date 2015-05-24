@@ -37,73 +37,67 @@ $event->trigger();
 $PAGE->set_url('/mod/attendance/student2.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($attendance->name));
 $PAGE->set_heading(format_string($course->fullname));
-/*
- * Other things you may want to set - remove if not needed.
- * $PAGE->set_cacheable(false);
- * $PAGE->set_focuscontrol('some-html-id');
- * $PAGE->add_body_class('attendance-'.$somevar);
- */
+
 // Output starts here.
 echo $OUTPUT->header();
-// Conditions to show the intro can change to look for own settings or whatever.
-echo'<ul class="nav nav-tabs">
-<li class="active"><a href="student2.php?id='.$id.'">Mark Attendance</a></li>
-<li><a href="student.php?id='.$id.'">My Attendances</a></li>
-</ul>';
-// Replace the following lines with you own code.
-// Get current day, month and year for current user.
-//Only the student can mark as a present
-if(is_a_student($COURSE, $USER)){
-    $sql = "SELECT starttime, endtime, id
-    FROM mdl_attendance_detail
-    WHERE attendanceid = $attendance->id
-    AND starttime < UNIX_TIMESTAMP(NOW( ))
-    AND endtime > UNIX_TIMESTAMP(NOW( )) 
-    LIMIT 1";
-    $range_of_time = $DB->get_record_sql( $sql );
-    $start_of_time  = $range_of_time->starttime;
-    $end_of_time    = $range_of_time->endtime;
-    $status = $DB->get_record_sql("SELECT attendancestatus FROM mdl_attendance_student_detail 
-                                    WHERE userid = $USER->id ORDER BY id DESC LIMIT 1");    
+
+// If the user is not a student redirects to view.php
+if(!is_a_student($COURSE, $USER))
+    die(redirect('view.php?id='.$id));
+
+// Create Tabs buttons to change between views
+echo   '<ul class="nav nav-tabs">
+            <li class="active"><a href="student2.php?id='.$id.'">Mark Attendance</a></li>
+            <li><a href="student.php?id='.$id.'">My Attendances</a></li>
+        </ul>';
+
+
+$sqlTimeRange   = " SELECT starttime, endtime, id
+                    FROM mdl_attendance_detail
+                    WHERE attendanceid = $attendance->id
+                    AND starttime < UNIX_TIMESTAMP(NOW( ))
+                    AND endtime > UNIX_TIMESTAMP(NOW( )) 
+                    LIMIT 1";
+$timeRange      = $DB->get_record_sql( $sqlTimeRange );
+$startTime      = $timeRange->starttime;
+$endTime        = $timeRange->endtime;
+$status         = $DB->get_record_sql( "SELECT attendancestatus 
+                                        FROM mdl_attendance_student_detail 
+                                        WHERE userid = $USER->id 
+                                        ORDER BY id DESC LIMIT 1");    
+
+// If the student is on time to mark the attendance
+if( $timeRange != null && $endTime>time() && $status->attendancestatus != "Present"){
+    $pform = new present_form($PAGE->url);
+    if($pform->get_data()) {
     
-    // If the student is on time to mark the attendance
-    if( ( $range_of_time != null || $range_of_time != '' || $range_of_time != array('', '') || $range_of_time != array(null, null) )
-        && $end_of_time>time() && $status->attendancestatus != "Present"){
-        $pform = new present_form($PAGE->url);
-        if($pform->get_data()) {
-        
-            $id_current_attendance = $DB->get_record_sql("SELECT id 
-            FROM mdl_attendance_detail 
-            WHERE attendanceid = $attendance->id
-            ORDER BY id DESC
-            LIMIT 1");
-            // The table structure is:
-            // _______________________________________________________
-            // | id | attendancedetailid | userid | attendancestatus |
-            $sql2 = "SELECT id 
-            FROM mdl_attendance_student_detail 
-            WHERE attendancedetailid = $id_current_attendance->id
-            AND userid = $USER->id";
-            $attendance_user_id = $DB->get_record_sql( $sql2 );
-            
-            // Creating one file to insert in the DB with their attributes
-            $records                            = new stdClass();
-            $records->id                        = $attendance_user_id->id;
-            $records->attendancestatus          = 'Present';
-            // The date is not the timestamp of the day at 00:00, the date is the actual time in UNIX
-            
-            // insert_record('name_of_the_table', 'values_to_insert')
-            // You must ommit 'mdl_', because by default is added
-            $lastinsertid = $DB->update_record('attendance_student_detail', $records);        //echo $id_attendance;
-            
-                
-        } else {
-            $pform->display();
-        }
-    }else if( $range_of_time != null || $range_of_time != '' || $range_of_time != array('', '') || $range_of_time != array(null, null) ){
-        echo "You are already Present";
+        $currentAttendanceId    = $DB->get_record_sql( "SELECT id 
+                                                        FROM mdl_attendance_detail 
+                                                        WHERE attendanceid = $attendance->id
+                                                        ORDER BY id DESC
+                                                        LIMIT 1");
+        $attendanceUserId       = $DB->get_record_sql( "SELECT id 
+                                                        FROM mdl_attendance_student_detail 
+                                                        WHERE attendancedetailid = $currentAttendanceId->id
+                                                        AND userid = $USER->id
+                                                        LIMIT 1");
+        // Create a record to insert in the DB
+        $records                            = new stdClass();
+        // Insert in the record the id of a alredy created entry to overwrite it
+        $records->id                        = $attendanceUserId->id;
+        // Insert the new attendance status to overwrite the entry
+        $records->attendancestatus          = 'Present';
+        $DB->update_record('attendance_student_detail', $records);
+        redirect('student.php?id='.$id);
+    } else {
+        $pform->display();
     }
-    
+}else if( $status->attendancestatus == "Present" ){
+    echo "You are already Present";
+}else{
+    echo "there is no attendance to mark";
 }
+    
+
 // Finish the page.
 echo $OUTPUT->footer();

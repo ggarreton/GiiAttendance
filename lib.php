@@ -552,8 +552,8 @@ class simplehtml_form extends moodleform {
  
         $mform =& $this->_form; // Don't forget the underscore! 
  
-        $mform->addElement('date_time_selector', 'start_of_time', get_string('start_of_time', 'mod_attendance') );
-        $mform->addElement('date_time_selector', 'end_of_time', get_string('end_of_time', 'mod_attendance') );
+        $mform->addElement('date_time_selector', 'startTime', get_string('start_of_time', 'mod_attendance') );
+        $mform->addElement('date_time_selector', 'endTime', get_string('end_of_time', 'mod_attendance') );
         
 
         $this->add_action_buttons( null );
@@ -585,7 +585,7 @@ function recording_information($name1, $value1){
 }
 
 function percentage($number){
-    $percentage = 100*$number.'%';
+    $percentage = (int)(100*$number).'%';
     return $percentage;
 }
 

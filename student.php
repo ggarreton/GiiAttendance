@@ -37,50 +37,49 @@ $event->trigger();
 $PAGE->set_url('/mod/attendance/student.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($attendance->name));
 $PAGE->set_heading(format_string($course->fullname));
-/*
- * Other things you may want to set - remove if not needed.
- * $PAGE->set_cacheable(false);
- * $PAGE->set_focuscontrol('some-html-id');
- * $PAGE->add_body_class('attendance-'.$somevar);
- */
+
 // Output starts here.
 echo $OUTPUT->header();
-// Conditions to show the intro can change to look for own settings or whatever.
-echo'<ul class="nav nav-tabs">
-<li><a href="student2.php?id='.$id.'">Mark Attendance</a></li>
-<li class="active"><a href="student.php?id='.$id.'">My Attendances</a></li>
-</ul>';
-if ($attendance->intro) {
-    echo $OUTPUT->box(format_module_intro('attendance', $attendance, $cm->id), 'generalbox mod_introbox', 'attendanceintro');
-}
-// Replace the following lines with you own code.
-// Get current day, month and year for current user.
-//Only the student can mark as a present
+
+// If the user is not a student redirects to view.php
+if(!is_a_student($COURSE, $USER))
+    die(redirect('view.php?id='.$id));
+
+// Create Tabs buttons to change between views
+echo   '<ul class="nav nav-tabs">
+            <li><a href="student2.php?id='.$id.'">Mark Attendance</a></li>
+            <li class="active"><a href="student.php?id='.$id.'">My Attendances</a></li>
+        </ul>';
         
-    $nabsent = 0;
-    $npresent = 0;
-    // Adding the table of the historical records of attendance for this student
-    $table = new html_table();
-    $sql_dates = "SELECT date, id
-    FROM mdl_attendance_detail
-    WHERE attendanceid = $attendance->id";
-    $dates = $DB->get_records_sql( $sql_dates );
-    $table->head = array('Date','Status');
-    // Select the full name of the users that have the rol student in this course
-    foreach ($dates as $date) {
-        $status = $DB->get_record_sql("SELECT attendancestatus FROM mdl_attendance_student_detail 
-                                        WHERE userid = $USER->id AND attendancedetailid = $date->id");
-        if($student->attendancestatus == 'Absent'){
-            $nabsent++;
-        }else{
-            $npresent++;
-        }
-        $table->data[] = array(usergetdate($date->date)['mday'].'-'.usergetdate($date->date)['month'], $status->attendancestatus);
+$nabsent        = 0;
+$npresent       = 0;
+// Adding the table of the historical records of attendance for this student
+$table          = new html_table();
+$sqlDates       =  "SELECT date, id
+                    FROM mdl_attendance_detail
+                    WHERE attendanceid = $attendance->id";
+$dates          = $DB->get_records_sql( $sqlDates );
+$table->head    = array('Date','Status');
+// Select the full name of the users that have the rol student in this course
+foreach ($dates as $date) {
+    // Get the current student status for the given date
+    $status     = $DB->get_record_sql(" SELECT attendancestatus 
+                                        FROM mdl_attendance_student_detail 
+                                        WHERE userid            = $USER->id 
+                                        AND attendancedetailid  = $date->id");
+    if($status->attendancestatus === 'Absent'){
+        $nabsent++;
+    }else{
+        $npresent++;
     }
-    $mean = $npresent/($npresent+$nabsent);
-    $table->data[] = array('% Attendance', percentage($mean));
-    $table->data[] = array('Absents', $nabsent);
-    echo html_writer::table($table);    
+    // Transform the unix timestamp in a day-month format and insert it in the table row along the student status
+    $table->data[] = array(usergetdate($date->date)['mday'].'-'.usergetdate($date->date)['month'], $status->attendancestatus);
+}
+// Calculate the mean of the user attendance
+$mean = $npresent/($npresent+$nabsent);
+$table->data[]  = array('% Attendance', percentage($mean));
+$table->data[]  = array('Absents', $nabsent);
+echo html_writer::table($table);    
     
 // Finish the page.
 echo $OUTPUT->footer();
