@@ -66,6 +66,7 @@ if(is_a_student($COURSE, $USER)){
 	WHERE attendanceid = $attendance->id
 	AND starttime < UNIX_TIMESTAMP(NOW( ))
 	AND endtime > UNIX_TIMESTAMP(NOW( )) 
+    ORDER BY id DESC
     LIMIT 1";
 
 	$range_of_time = $DB->get_record_sql( $sql );

@@ -1,0 +1,468 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "student2.php",
+			"settings":
+			{
+				"buffer_size": 5013,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"contents": "SublimeJira\n===========\n\nSublimeJira lets you view update and create Jira tickets from the comfort of your favorite editor.\n\nFeatures\n---------\n* Create, view and update issues using Sublime Text only\n* Integraton with any Jira instance (version >= 5)\n\nInstalling\n---------\n**With the Package Control plugin:** The easiest way to install SublimeJira is through Package Control, which can be found at http://wbond.net/sublime_packages/package_control\n\n\nUsage\n---------\n\nThe plugin adds command palette three items:\n\n* Get issue – prompt issue key and show it in a new tab\n* Update issue – save changes\n* Create issue – prompt project key, summary, create new issue and open show it in new tab\n\nand some two-pass shortcuts:\n* cmd + option + j, cmd + option + i – get **i**ssue\n* cmd + option + j, cmd + option + u – **u**pdate issue\n* cmd + option + j, cmd + option + n – create **n**ew issue\n\nConfigure\n---------\nGo to \"Preferences => Package Settings => Sublime Jira => Settings – User\"\nand paste some like this:\n```\n{\n  \"jira_server\": \"https://yourdomain.atlassian.net\",\n  \"jira_login\": \"username\",\n  \"jira_password\": \"password\",\n  \"jira_default_project\": \"YOURPROJECT\"\n}\n```\n",
+			"file": "/C/Users/cami2_000/AppData/Roaming/Sublime Text 3/Packages/Jira/README.md",
+			"file_size": 1191,
+			"file_write_time": 130766334253714375,
+			"settings":
+			{
+				"buffer_size": 1177,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "student.php",
+			"settings":
+			{
+				"buffer_size": 3877,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "teacher2.php",
+			"settings":
+			{
+				"buffer_size": 4466,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "passattendance.php",
+			"settings":
+			{
+				"buffer_size": 5551,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 392.0,
+		"last_filter": "con",
+		"selected_items":
+		[
+			[
+				"con",
+				"Package Control: Remove Package"
+			],
+			[
+				"ji",
+				"Markup Jira Confluence: Post page to Jira Confluence"
+			],
+			[
+				"inst",
+				"Package Control: Install Package"
+			],
+			[
+				"git",
+				"Package Control: List Packages"
+			],
+			[
+				"cont",
+				"Package Control: Remove Package"
+			],
+			[
+				"pack",
+				"Package Control: Install Package"
+			],
+			[
+				"jira",
+				"SublimeJira: Create issue"
+			],
+			[
+				"git s",
+				"Git: Status"
+			],
+			[
+				"setti",
+				"Preferences: Package Control Settings – User"
+			],
+			[
+				"prefer",
+				"Preferences: Package Control Settings – Default"
+			],
+			[
+				"git ",
+				"SublimeGit: Documentation"
+			],
+			[
+				"git hel",
+				"Git: Help"
+			],
+			[
+				"git che",
+				"Git: Checkout"
+			],
+			[
+				"git add",
+				"Git: Add Remote"
+			],
+			[
+				"git st",
+				"Git: Status"
+			],
+			[
+				"contr",
+				"Package Control: Install Package"
+			],
+			[
+				"subl",
+				"SublimeJira: Get issue"
+			],
+			[
+				"add",
+				"Package Control: Add Repository"
+			],
+			[
+				"prefe",
+				"Preferences: Browse Packages"
+			],
+			[
+				"Package Control: ",
+				"Package Control: Install Package"
+			],
+			[
+				"",
+				"Package Control: Add Repository"
+			],
+			[
+				"file: ",
+				"File: New View into File"
+			],
+			[
+				"Package Control: te",
+				"Package Control: List Packages"
+			]
+		],
+		"width": 424.0
+	},
+	"console":
+	{
+		"height": 193.0,
+		"history":
+		[
+			"import urllib.request,os,hashlib; h = '7183a2d3e96f11eeadd761d777e62404' + 'e330c659d4bb41d3bdf022e94cab3cd0'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/C/xampp/htdocs/webcursosSI/mod/attendance"
+	],
+	"file_history":
+	[
+		"/C/Users/cami2_000/AppData/Roaming/Sublime Text 3/Packages/Jira/SublimeJira.sublime-settings",
+		"/C/Users/cami2_000/AppData/Roaming/Sublime Text 3/Packages/Jira/sublime_jira.py",
+		"/C/Users/cami2_000/AppData/Roaming/Sublime Text 3/Packages/User/Package Control.sublime-settings",
+		"/C/Users/cami2_000/AppData/Roaming/Sublime Text 3/Installed Packages/SublimeTextGitX.sublime-package",
+		"/C/Users/cami2_000/AppData/Roaming/Sublime Text 3/Packages/User/Preferences.sublime-settings",
+		"/C/Users/cami2_000/AppData/Roaming/Sublime Text 3/Packages/Package Control/Package Control.sublime-settings",
+		"/C/Users/cami2_000/AppData/Roaming/Sublime Text 3/Installed Packages/SublimeGit.sublime-package",
+		"/E/Documentos/AMPL/exportador.mod",
+		"/E/Documentos/AMPL/bonos.mod",
+		"/C/xampp/htdocs/innovacion/causa-con-verduras.jpg"
+	],
+	"find":
+	{
+		"height": 23.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"/usr/local/bin/git"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "student2.php",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5013,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2711,
+								2711
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/PHP/PHP.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 780.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "/C/Users/cami2_000/AppData/Roaming/Sublime Text 3/Packages/Jira/README.md",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1177,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								692,
+								692
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Markdown/Markdown.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "student.php",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3877,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3734,
+								3734
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/PHP/PHP.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 901.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "teacher2.php",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4466,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4466,
+								4466
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/PHP/PHP.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 886.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "passattendance.php",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5551,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5528,
+								5528
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/PHP/PHP.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1082.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 23.0
+	},
+	"input":
+	{
+		"height": 31.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "GIA.sublime-project",
+	"replace":
+	{
+		"height": 42.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"contol",
+				"C:\\Users\\cami2_000\\AppData\\Roaming\\Sublime Text 3\\Packages\\User\\Package Control.sublime-settings"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

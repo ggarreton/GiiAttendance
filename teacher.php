@@ -100,12 +100,6 @@ echo'<ul class="nav nav-tabs">
 
 echo $OUTPUT->heading('Students Attendances');
 
-$npresent = 0;
-$nabsent = 0;
-$npresent_day = array();
-$nabsent_day = array();
-$cont = 0;
-
 foreach ($students as $student) {
     $npresent_day[$cont] = 0;
     $nabsent_day[$cont] = 0;
