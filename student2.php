@@ -6,7 +6,7 @@
  * if you like, and it can span multiple lines.
  *
  * @package    mod_attendance
- * @copyright  2015 Your Name
+ * @copyright  2015 GIA
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 // Replace attendance with the name of your module and remove this line.
@@ -59,8 +59,13 @@ $sqlTimeRange   = " SELECT starttime, endtime, id
                     AND endtime > UNIX_TIMESTAMP(NOW( )) 
                     LIMIT 1";
 $timeRange      = $DB->get_record_sql( $sqlTimeRange );
-$startTime      = $timeRange->starttime;
-$endTime        = $timeRange->endtime;
+// The isset is for debugging
+if(isset($timeRange->starttime)){
+    $startTime      = $timeRange->starttime;
+}
+if(isset($timeRange->endtime)){
+    $endTime        = $timeRange->endtime;
+}
 $status         = $DB->get_record_sql( "SELECT attendancestatus 
                                         FROM mdl_attendance_student_detail 
                                         WHERE userid = $USER->id 
@@ -95,7 +100,7 @@ if( $timeRange != null && $endTime>time() && $status->attendancestatus != "Prese
 }else if( $status->attendancestatus == "Present" ){
     echo "You are already Present";
 }else{
-    echo "there is no attendance to mark";
+    echo "There is no attendance to mark";
 }
     
 

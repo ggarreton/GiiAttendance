@@ -20,12 +20,14 @@
  * if you like, and it can span multiple lines.
  *
  * @package    mod_attendance
- * @copyright  2015 Your Name
+ * @copyright  2015 GIA
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 // Replace attendance with the name of your module and remove this line.
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 require_once(dirname(__FILE__).'/lib.php');
+//$cssfilename = dirname(__FILE__).'/set_time.css';
+$PAGE->requires->css(dirname(__FILE__).'/set_time.css');
 $id = optional_param('id', 0, PARAM_INT); // Course_module ID, or
 $n  = optional_param('n', 0, PARAM_INT);  // ... attendance instance ID - it should be named as the first character of the module.
 if ($id) {
@@ -122,30 +124,6 @@ if($mform->get_data()) {
     
 } else {
     $mform->display();
-?>
-<!-- Style to hide the year, month and dey of the date selector-->
-<style>
-select#id_startTime_day{
-display: none
-}
-select#id_startTime_month{
-display: none
-}
-select#id_startTime_year{
-display: none
-}
-select#id_endTime_day{
-display: none
-}
-select#id_endTime_month{
-display: none
-}
-select#id_endTime_year{
-display: none
-}
-}
-</style>
-<?php
 }
 
 // Finish the page.

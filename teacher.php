@@ -20,7 +20,7 @@
  * if you like, and it can span multiple lines.
  *
  * @package    mod_attendance
- * @copyright  2015 Your Name
+ * @copyright  2015 GIA
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 // Replace attendance with the name of your module and remove this line.
@@ -86,9 +86,14 @@ echo   '<ul class="nav nav-tabs">
 
 echo $OUTPUT->heading('Students Attendances');
 
+// Defining variables for debugging
 $npresent       = 0;
 $nabsent        = 0;
 $dateCount      = 0;
+$npresentDay    = array();
+$nabsentDay     = array();
+$meanDay        = array();
+$cont           = 0;
 $table          = new html_table();
 $tableHead      = array('Student');
 // Transform the unix date from the database into a "day-month" format
