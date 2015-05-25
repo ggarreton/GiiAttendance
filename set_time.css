@@ -1,0 +1,30 @@
+// Style to hide the year, month and dey of the date selector
+
+select{
+	display: block;
+}
+
+select#id_startTime_day{
+	display: none;
+}
+
+select#id_startTime_month{
+	display: none;
+}
+
+select#id_startTime_year{
+	display: none;
+}
+
+select#id_endTime_day{
+	display: none;
+}
+
+select#id_endTime_month{
+	display: none;
+}
+
+select#id_endTime_year{
+	display: none;
+}
+

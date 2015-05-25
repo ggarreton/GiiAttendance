@@ -21,7 +21,7 @@
  * visit: http://docs.moodle.org/en/Development:lib/formslib.php
  *
  * @package    mod_attendance
- * @copyright  2015 Your Name
+ * @copyright  2015 GIA
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

@@ -20,7 +20,7 @@
  * if you like, and it can span multiple lines.
  *
  * @package    mod_attendance
- * @copyright  2015 Your Name
+ * @copyright  2015 GIA
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 // Replace attendance with the name of your module and remove this line.
@@ -31,9 +31,9 @@ $n  = optional_param('n', 0, PARAM_INT);  // ... attendance instance ID - it sho
 if ($id) {
     $cm         = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
     $course     = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-    $attendance  = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
+    $attendance = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
 } else if ($n) {
-    $attendance  = $DB->get_record('attendance', array('id' => $n), '*', MUST_EXIST);
+    $attendance = $DB->get_record('attendance', array('id' => $n), '*', MUST_EXIST);
     $course     = $DB->get_record('course', array('id' => $attendance->course), '*', MUST_EXIST);
     $cm         = get_coursemodule_from_instance('attendance', $attendance->id, $course->id, false, MUST_EXIST);
 } else {
@@ -41,8 +41,8 @@ if ($id) {
 }
 require_login($course, true, $cm);
 $event = \mod_attendance\event\course_module_viewed::create(array(
-    'objectid' => $PAGE->cm->instance,
-    'context' => $PAGE->context,
+    'objectid'  => $PAGE->cm->instance,
+    'context'   => $PAGE->context,
 ));
 $event->add_record_snapshot('course', $PAGE->course);
 $event->add_record_snapshot($PAGE->cm->modname, $attendance);
@@ -51,22 +51,16 @@ $event->trigger();
 $PAGE->set_url('/mod/attendance/teacher.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($attendance->name));
 $PAGE->set_heading(format_string($course->fullname));
-/*
- * Other things you may want to set - remove if not needed.
- * $PAGE->set_cacheable(false);
- * $PAGE->set_focuscontrol('some-html-id');
- * $PAGE->add_body_class('attendance-'.$somevar);
- */
+
 // Output starts here.
 echo $OUTPUT->header();
-// Conditions to show the intro can change to look for own settings or whatever.
-if ($attendance->intro) {
-    echo $OUTPUT->box(format_module_intro('attendance', $attendance, $cm->id), 'generalbox mod_introbox', 'attendanceintro');
-}
-// Replace the following lines with you own code.
-// Get current day, month and year for current user.
-// Print formatted date in user time.
-$sql=      "SELECT DISTINCT u.id AS userid, c.id AS courseid
+
+// If the user is not a teacher redirects to view.php
+if(!is_a_teacher($COURSE, $USER))
+    die(redirect('view.php?id='.$id));
+
+// The sql gets the list of students enroled in the current course and realice all the verifications so the user is active, not deleted, etc
+$sqlUsers= "SELECT DISTINCT u.id AS userid, u.firstname, u.lastname
             FROM mdl_user u
             JOIN mdl_user_enrolments ue ON ue.userid = u.id
             JOIN mdl_enrol e ON e.id = ue.enrolid
@@ -77,78 +71,84 @@ $sql=      "SELECT DISTINCT u.id AS userid, c.id AS courseid
             WHERE e.status = 0 AND u.suspended = 0 AND u.deleted = 0
             AND (ue.timeend = 0 OR ue.timeend > NOW()) AND ue.status = 0
             AND c.id = $attendance->course";
-
-$sql_dates="SELECT date
+// The sql gets the list of dates where a attendance where recorded
+$sqlDates= "SELECT date
             FROM mdl_attendance_detail
             GROUP BY date
             ORDER BY date"; 
-
-$students = $DB->get_records_sql( $sql);
-$dates= $DB->get_records_sql( $sql_dates);
-$array= array('Student');
-
-foreach ($dates as $date) {
-    array_push($array, usergetdate($date->date)["mday"]."-".usergetdate($date->date)["month"]);
-}
-array_push($array, '% Attendance');
-
-echo'<ul class="nav nav-tabs">
-<li><a href="teacher2.php?id='.$id.'">Take Attendance</a></li>
-<li class="active"><a href="teacher.php?id='.$id.'">Attendance Review</a></li>
-</ul>';
-
+$students   = $DB->get_records_sql( $sqlUsers);
+$dates      = $DB->get_records_sql( $sqlDates);
+// Create Tabs buttons to change between views
+echo   '<ul class="nav nav-tabs">
+            <li><a href="teacher2.php?id='.$id.'">Take Attendance</a></li>
+            <li class="active"><a href="teacher.php?id='.$id.'">Attendance Review</a></li>
+        </ul>';
 
 echo $OUTPUT->heading('Students Attendances');
 
-foreach ($students as $student) {
-    $npresent_day[$cont] = 0;
-    $nabsent_day[$cont] = 0;
-    $cont++;
+// Defining variables for debugging
+$npresent       = 0;
+$nabsent        = 0;
+$dateCount      = 0;
+$npresentDay    = array();
+$nabsentDay     = array();
+$meanDay        = array();
+$cont           = 0;
+$table          = new html_table();
+$tableHead      = array('Student');
+// Transform the unix date from the database into a "day-month" format
+foreach ($dates as $date) {
+    array_push($tableHead, usergetdate($date->date)["mday"]."-".usergetdate($date->date)["month"]);
 }
-$cont = 0;
+array_push($tableHead, '% Attendance');
 
-$table = new html_table();
-$table->head = $array;
+// Insert in an array the headers to be used in the table
+$table->head = $tableHead;
+
 foreach ($students as $student) {
-    $name = $DB->get_record_sql("SELECT u.firstname, u.lastname FROM mdl_user u WHERE u.id = $student->userid");
-    $data=array($name->firstname." ".$name->lastname);
+    // Create a row whit the user name and lastname in the first column
+    $row    = array($student->firstname." ".$student->lastname);
     foreach($dates as $date){   
-        $dateunix=usergetdate($date->date)[0]; 
-        $sql_status =  "SELECT sd.attendancestatus 
+        $sqlStatus  =  "SELECT sd.attendancestatus 
                         FROM mdl_attendance_student_detail sd, mdl_attendance_detail ad 
                         WHERE sd.attendancedetailid=ad.id 
-                        AND ad.date=$dateunix 
+                        AND ad.date=$date->date 
                         AND sd.userid=$student->userid";
-        $attendancestatus = $DB->get_record_sql( $sql_status )->attendancestatus;
-        array_push($data, $attendancestatus);
-        if($attendancestatus == "Absent"){
+        // Get student attendance status for the given date
+        $attendanceStatus   = $DB->get_record_sql( $sqlStatus )->attendancestatus;
+        // Inssert in the row, the user status for the given day
+        array_push($row, $attendanceStatus);
+        // Increase de number of absents, or present for each student and for the given date
+        if($attendanceStatus == "Absent"){
             $nabsent++;
-            $nabsent_day[$cont]++;
+            $nabsentDay[$dateCount]++;
         }else{
             $npresent++;
-            $npresent_day[$cont]++;
+            $npresentDay[$dateCount]++;
         }
-        $cont++;
+        $dateCount++;
     }
-    $cont = 0;
-    $mean = $npresent/($npresent+$nabsent);
-    array_push($data, percentage($mean));
-    $table->data[] = $data;
-    $npresent = 0;
-    $nabsent = 0;
-
+    // Calculate the % of attendance for the current student and insert it to the row
+    $mean           = $npresent/($npresent+$nabsent);
+    array_push($row, percentage($mean));
+    // Add row to de table
+    $table->data[]  = $row;
+    // Reset Counts
+    $dateCount      = 0;    
+    $npresent       = 0;
+    $nabsent        = 0;
 }
-$data=array('');
+// Create an extra row to summarize the attendance of the course
+$row=array('Class Attendance');
 foreach($dates as $date){ 
-    $mean_day[$cont] = $npresent_day[$cont]/($npresent_day[$cont]+$nabsent_day[$cont]);
-    array_push($data, percentage($mean_day[$cont]));
-    $cont++;
+    // Calcuate the mean for the given date and add it to the row
+    $meanDay[$dateCount] = $npresentDay[$dateCount]/($npresentDay[$dateCount]+$nabsentDay[$dateCount]);
+    array_push($row, percentage($meanDay[$dateCount]));
+    $dateCount++;
 }
-array_push($data, '');
-$table->data[] = $data;
-
-
+// Calculate the total attendance and add it to the row
+array_push($row,  percentage(array_sum($meanDay)/count($meanDay)));
+$table->data[] = $row;
 echo html_writer::table($table);
-
 // Finish the page.
 echo $OUTPUT->footer();
