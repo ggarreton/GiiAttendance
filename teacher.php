@@ -121,12 +121,12 @@ foreach ($students as $student) {
         // Insert in the table the icon corresponding to the user status
         array_push($row, html_writer::empty_tag('input', array('type' => 'image', 'src'=>$OUTPUT->pix_url($studentStatus), 'alt'=>"")));
         // Increase de number of absents, or present for each student and for the given date
-        if($attendanceStatus == "Absent"){
-            $nabsent++;
-            $nabsentDay[$dateCount]++;
-        }else{
+        if($attendanceStatus == "Present"){
             $npresent++;
             $npresentDay[$dateCount]++;
+        }else{
+            $nabsent++;
+            $nabsentDay[$dateCount]++;
         }
         $dateCount++;
     }
