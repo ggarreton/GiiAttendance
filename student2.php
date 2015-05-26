@@ -60,50 +60,51 @@ $sqlTimeRange   = " SELECT starttime, endtime, id
                     LIMIT 1";
 $timeRange      = $DB->get_record_sql( $sqlTimeRange );
 // The isset is for debugging
-if(isset($timeRange->starttime)){
-    $startTime      = $timeRange->starttime;
-}
-if(isset($timeRange->endtime)){
-    $endTime        = $timeRange->endtime;
-}
-$status         = $DB->get_record_sql( "SELECT attendancestatus 
-                                        FROM mdl_attendance_student_detail 
-                                        WHERE userid = $USER->id 
-                                        AND attendancedetailid = $timeRange->id");    
+if(isset($timeRange->starttime) && isset($timeRange->endtime)){
 
-// If the student is on time to mark the attendance
-if( $timeRange != null && $endTime>time() && $status->attendancestatus != "Present"){
-    $pform = new present_form($PAGE->url);
-    if($pform->get_data()) {
-    
-        $currentAttendanceId    = $DB->get_record_sql( "SELECT id 
-                                                        FROM mdl_attendance_detail 
-                                                        WHERE attendanceid = $attendance->id
-                                                        ORDER BY id DESC
-                                                        LIMIT 1");
-        $attendanceUserId       = $DB->get_record_sql( "SELECT id 
-                                                        FROM mdl_attendance_student_detail 
-                                                        WHERE attendancedetailid = $currentAttendanceId->id
-                                                        AND userid = $USER->id
-                                                        LIMIT 1");
-        // Create a record to insert in the DB
-        $records                            = new stdClass();
-        // Insert in the record the id of a alredy created entry to overwrite it
-        $records->id                        = $attendanceUserId->id;
-        // Insert the new attendance status to overwrite the entry
-        $records->attendancestatus          = 'Present';
-        $DB->update_record('attendance_student_detail', $records);
-        redirect('student.php?id='.$id);
-    } else if($status->attendancestatus == "Absent"){
-        $pform->display();
-    } else{
-        echo "You are not availeble to mark present";
+        $startTime      = $timeRange->starttime;
+        $endTime        = $timeRange->endtime;
+
+    $status         = $DB->get_record_sql( "SELECT attendancestatus 
+                                            FROM mdl_attendance_student_detail 
+                                            WHERE userid = $USER->id 
+                                            AND attendancedetailid = $timeRange->id");    
+
+    // If the student is on time to mark the attendance
+    if( $timeRange != null && $endTime>time() && $status->attendancestatus != "Present"){
+        $pform = new present_form($PAGE->url);
+        if($pform->get_data()) {
+        
+            $currentAttendanceId    = $DB->get_record_sql( "SELECT id 
+                                                            FROM mdl_attendance_detail 
+                                                            WHERE attendanceid = $attendance->id
+                                                            ORDER BY id DESC
+                                                            LIMIT 1");
+            $attendanceUserId       = $DB->get_record_sql( "SELECT id 
+                                                            FROM mdl_attendance_student_detail 
+                                                            WHERE attendancedetailid = $currentAttendanceId->id
+                                                            AND userid = $USER->id
+                                                            LIMIT 1");
+            // Create a record to insert in the DB
+            $records                            = new stdClass();
+            // Insert in the record the id of a alredy created entry to overwrite it
+            $records->id                        = $attendanceUserId->id;
+            // Insert the new attendance status to overwrite the entry
+            $records->attendancestatus          = 'Present';
+            $DB->update_record('attendance_student_detail', $records);
+            redirect('student.php?id='.$id);
+        } else if($status->attendancestatus == "Absent"){
+            $pform->display();
+        } else{
+            echo "You are not availeble to mark present";
+        }
+    }else if( $status->attendancestatus == "Present" ){
+        echo "You are already Present";
+    }else{
+        echo "There is no attendance to mark";
     }
-}else if( $status->attendancestatus == "Present" ){
-    echo "You are already Present";
-}else{
+}else
     echo "There is no attendance to mark";
-}
     
 
 // Finish the page.

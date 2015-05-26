@@ -83,79 +83,81 @@ echo   '<ul class="nav nav-tabs">
             <li><a href="teacher2.php?id='.$id.'">Take Attendance</a></li>
             <li class="active"><a href="teacher.php?id='.$id.'">Attendance Review</a></li>
         </ul>';
-
 echo $OUTPUT->heading('Students Attendances');
-
-// Defining variables for debugging
-$npresent       = 0;
-$nabsent        = 0;
-$dateCount      = 0;
-$npresentDay    = array();
-$nabsentDay     = array();
-$meanDay        = array();
-$cont           = 0;
-$table          = new html_table();
-$tableHead      = array('Student');
-// Transform the unix date from the database into a "day-month" format
-foreach ($dates as $date) {
-    array_push($tableHead, usergetdate($date->date)["mday"]."-".usergetdate($date->date)["month"]);
-}
-array_push($tableHead, '% Attendance');
-
-// Insert in an array the headers to be used in the table
-$table->head = $tableHead;
-
-foreach ($students as $student) {
-    // Create a row whit the user name and lastname in the first column
-    $row    = array($student->firstname." ".$student->lastname);
-    foreach($dates as $date){   
-        $sqlStatus  =  "SELECT sd.attendancestatus 
-                        FROM mdl_attendance_student_detail sd, mdl_attendance_detail ad 
-                        WHERE sd.attendancedetailid=ad.id
-                        AND sd.attendancedetailid=$date->id
-                        AND ad.date=$date->date 
-                        AND sd.userid=$student->userid";
-        // Get student attendance status for the given date
-        $attendanceStatus   = $DB->get_record_sql( $sqlStatus )->attendancestatus;
-        // Set the correct icon url for the user status
-        $studentStatus = ($attendanceStatus === "Present")? 'i/grade_correct' : 'i/grade_incorrect';
-        // Insert in the table the icon corresponding to the user status
-        array_push($row, html_writer::empty_tag('input', array('type' => 'image', 'src'=>$OUTPUT->pix_url($studentStatus), 'alt'=>"")));
-        // Increase de number of absents, or present for each student and for the given date
-        if($attendanceStatus == "Present"){
-            $npresent++;
-            $npresentDay[$dateCount]++;
-        }else{
-            $nabsent++;
-            $nabsentDay[$dateCount]++;
-        }
-        $dateCount++;
-    }
-    // Calculate the % of attendance for the current student and insert it to the row
-    $mean           = $npresent/($npresent+$nabsent);
-    array_push($row, percentage($mean));
-    // Add row to de table
-    $table->data[]  = $row;
-    // Reset Counts
-    $dateCount      = 0;    
+// Verify if there is attendances to display
+if(count($dates)!=0){
+    // Defining variables for debugging
     $npresent       = 0;
     $nabsent        = 0;
-}
-// Create an extra row to summarize the attendance of the course
-$row=array('Class Attendance');
-foreach($dates as $date){ 
-    // Calcuate the mean for the given date and add it to the row
-    $meanDay[$dateCount] = $npresentDay[$dateCount]/($npresentDay[$dateCount]+$nabsentDay[$dateCount]);
-    array_push($row, percentage($meanDay[$dateCount]));
-    $dateCount++;
-}
-// Calculate the total attendance and add it to the row
-array_push($row,  percentage(array_sum($meanDay)/count($meanDay)));
-$table->data[] = $row;
-echo html_writer::table($table);
+    $dateCount      = 0;
+    $npresentDay    = array();
+    $nabsentDay     = array();
+    $meanDay        = array();
+    $cont           = 0;
+    $table          = new html_table();
+    $tableHead      = array('Student');
+    // Transform the unix date from the database into a "day-month" format
+    foreach ($dates as $date) {
+        array_push($tableHead, usergetdate($date->date)["mday"]."-".usergetdate($date->date)["month"]);
+    }
+    array_push($tableHead, '% Attendance');
 
-echo '<ul class="nav nav-pills nav-stacked">
-  <li role="presentation"><a href="edit_attendance.php?id='.$id.'">Edit</a></li>
-</ul>';
+    // Insert in an array the headers to be used in the table
+    $table->head = $tableHead;
+
+    foreach ($students as $student) {
+        // Create a row whit the user name and lastname in the first column
+        $row    = array($student->firstname." ".$student->lastname);
+        foreach($dates as $date){   
+            $sqlStatus  =  "SELECT sd.attendancestatus 
+                            FROM mdl_attendance_student_detail sd, mdl_attendance_detail ad 
+                            WHERE sd.attendancedetailid=ad.id
+                            AND sd.attendancedetailid=$date->id
+                            AND ad.date=$date->date 
+                            AND sd.userid=$student->userid";
+            // Get student attendance status for the given date
+            $attendanceStatus   = $DB->get_record_sql( $sqlStatus )->attendancestatus;
+            // Set the correct icon url for the user status
+            $studentStatus = ($attendanceStatus === "Present")? 'i/grade_correct' : 'i/grade_incorrect';
+            // Insert in the table the icon corresponding to the user status
+            array_push($row, html_writer::empty_tag('input', array('type' => 'image', 'src'=>$OUTPUT->pix_url($studentStatus), 'alt'=>"")));
+            // Increase de number of absents, or present for each student and for the given date
+            if($attendanceStatus == "Present"){
+                $npresent++;
+                $npresentDay[$dateCount]++;
+            }else{
+                $nabsent++;
+                $nabsentDay[$dateCount]++;
+            }
+            $dateCount++;
+        }
+        // Calculate the % of attendance for the current student and insert it to the row
+        $mean           = $npresent/($npresent+$nabsent);
+        array_push($row, percentage($mean));
+        // Add row to de table
+        $table->data[]  = $row;
+        // Reset Counts
+        $dateCount      = 0;    
+        $npresent       = 0;
+        $nabsent        = 0;
+    }
+    // Create an extra row to summarize the attendance of the course
+    $row=array('Class Attendance');
+    foreach($dates as $date){ 
+        // Calcuate the mean for the given date and add it to the row
+        $meanDay[$dateCount] = $npresentDay[$dateCount]/($npresentDay[$dateCount]+$nabsentDay[$dateCount]);
+        array_push($row, percentage($meanDay[$dateCount]));
+        $dateCount++;
+    }
+    // Calculate the total attendance and add it to the row
+    array_push($row,  percentage(array_sum($meanDay)/count($meanDay)));
+    $table->data[] = $row;
+    echo html_writer::table($table);
+
+    echo '<ul class="nav nav-pills nav-stacked">
+      <li role="presentation"><a href="edit_attendance.php?id='.$id.'">Edit</a></li>
+    </ul>';
+}else
+echo "There is no attendances to display";
 // Finish the page.
 echo $OUTPUT->footer();
