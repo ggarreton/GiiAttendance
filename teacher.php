@@ -116,8 +116,10 @@ foreach ($students as $student) {
                         AND sd.userid=$student->userid";
         // Get student attendance status for the given date
         $attendanceStatus   = $DB->get_record_sql( $sqlStatus )->attendancestatus;
-        // Inssert in the row, the user status for the given day
-        array_push($row, $attendanceStatus);
+        // Set the correct icon url for the user status
+        $studentStatus = ($attendanceStatus === "Present")? 'i/grade_correct' : 'i/grade_incorrect';
+        // Insert in the table the icon corresponding to the user status
+        array_push($row, html_writer::empty_tag('input', array('type' => 'image', 'src'=>$OUTPUT->pix_url($studentStatus), 'alt'=>"")));
         // Increase de number of absents, or present for each student and for the given date
         if($attendanceStatus == "Absent"){
             $nabsent++;
@@ -150,5 +152,9 @@ foreach($dates as $date){
 array_push($row,  percentage(array_sum($meanDay)/count($meanDay)));
 $table->data[] = $row;
 echo html_writer::table($table);
+
+echo '<ul class="nav nav-pills nav-stacked">
+  <li role="presentation"><a href="edit_attendance.php?id='.$id.'">Edit</a></li>
+</ul>';
 // Finish the page.
 echo $OUTPUT->footer();

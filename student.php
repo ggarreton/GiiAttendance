@@ -67,13 +67,15 @@ foreach ($dates as $date) {
                                         FROM mdl_attendance_student_detail 
                                         WHERE userid            = $USER->id 
                                         AND attendancedetailid  = $date->id");
-    if($status->attendancestatus === 'Absent'){
-        $nabsent++;
-    }else{
+    if($status->attendancestatus === 'Present'){
         $npresent++;
+    }else{
+        $nabsent++;
     }
+    // Set the correct icon url for the user status
+    $studentStatus = ($status->attendancestatus === "Present")? 'i/grade_correct' : 'i/grade_incorrect';
     // Transform the unix timestamp in a day-month format and insert it in the table row along the student status
-    $table->data[] = array(usergetdate($date->date)['mday'].'-'.usergetdate($date->date)['month'], $status->attendancestatus);
+    $table->data[] = array(usergetdate($date->date)['mday'].'-'.usergetdate($date->date)['month'], html_writer::empty_tag('input', array('type' => 'image', 'src'=>$OUTPUT->pix_url($studentStatus), 'alt'=>"")));
 }
 // Calculate the mean of the user attendance
 $mean = $npresent/($npresent+$nabsent);

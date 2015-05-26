@@ -68,9 +68,6 @@ echo $OUTPUT->header();
 if(!is_a_teacher($COURSE, $USER))
     die(redirect('view.php?id='.$id));
 
-// Replace the following lines with you own code.
-// Get current day, month and year for current user.
-// Print formatted date in user time.
 $sqlStudents=  "SELECT DISTINCT u.id AS userid
                 FROM mdl_user u
                 JOIN mdl_user_enrolments ue ON ue.userid = u.id

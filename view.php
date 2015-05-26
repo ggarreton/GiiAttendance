@@ -65,10 +65,6 @@ $PAGE->set_heading(format_string($course->fullname));
 // Output starts here.
 echo $OUTPUT->header();
 
-// Conditions to show the intro can change to look for own settings or whatever.
-if ($attendance->intro) {
-    echo $OUTPUT->box(format_module_intro('attendance', $attendance, $cm->id), 'generalbox mod_introbox', 'attendanceintro');
-}
 
 // The user is redirected according to his role in the course
 if(is_a_teacher($COURSE, $USER))
