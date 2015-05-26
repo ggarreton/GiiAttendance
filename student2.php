@@ -69,7 +69,7 @@ if(isset($timeRange->endtime)){
 $status         = $DB->get_record_sql( "SELECT attendancestatus 
                                         FROM mdl_attendance_student_detail 
                                         WHERE userid = $USER->id 
-                                        ORDER BY id DESC LIMIT 1");    
+                                        AND attendancedetailid = $timeRange->id");    
 
 // If the student is on time to mark the attendance
 if( $timeRange != null && $endTime>time() && $status->attendancestatus != "Present"){
@@ -94,8 +94,10 @@ if( $timeRange != null && $endTime>time() && $status->attendancestatus != "Prese
         $records->attendancestatus          = 'Present';
         $DB->update_record('attendance_student_detail', $records);
         redirect('student.php?id='.$id);
-    } else {
+    } else if($status->attendancestatus == "Absent"){
         $pform->display();
+    } else{
+        echo "You are not availeble to mark present";
     }
 }else if( $status->attendancestatus == "Present" ){
     echo "You are already Present";

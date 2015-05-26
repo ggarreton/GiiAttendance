@@ -72,10 +72,10 @@ $sqlUsers= "SELECT DISTINCT u.id AS userid, u.firstname, u.lastname
             AND (ue.timeend = 0 OR ue.timeend > NOW()) AND ue.status = 0
             AND c.id = $attendance->course";
 // The sql gets the list of dates where a attendance where recorded
-$sqlDates= "SELECT date
-            FROM mdl_attendance_detail
-            GROUP BY date
-            ORDER BY date"; 
+$sqlDates   =  "SELECT date, id
+                FROM mdl_attendance_detail
+                WHERE attendanceid = $attendance->id
+                ORDER BY date"; 
 $students   = $DB->get_records_sql( $sqlUsers);
 $dates      = $DB->get_records_sql( $sqlDates);
 // Create Tabs buttons to change between views
@@ -111,7 +111,8 @@ foreach ($students as $student) {
     foreach($dates as $date){   
         $sqlStatus  =  "SELECT sd.attendancestatus 
                         FROM mdl_attendance_student_detail sd, mdl_attendance_detail ad 
-                        WHERE sd.attendancedetailid=ad.id 
+                        WHERE sd.attendancedetailid=ad.id
+                        AND sd.attendancedetailid=$date->id
                         AND ad.date=$date->date 
                         AND sd.userid=$student->userid";
         // Get student attendance status for the given date

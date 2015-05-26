@@ -65,6 +65,7 @@ if(!is_a_teacher($COURSE, $USER))
     die(redirect('view.php?id='.$id));
 $sqlLastDate=  "SELECT  date 
                 FROM mdl_attendance_detail
+                WHERE attendanceid = $attendance->id
                 ORDER BY date 
                 DESC 
                 limit 1";

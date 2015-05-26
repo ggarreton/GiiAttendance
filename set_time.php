@@ -69,6 +69,7 @@ if(!is_a_teacher($COURSE, $USER))
     die(redirect('view.php?id='.$id));
 $sqlLastDate=  "SELECT  date 
                 FROM mdl_attendance_detail
+                WHERE attendanceid = $attendance->id
                 ORDER BY date 
                 DESC 
                 limit 1";
@@ -98,9 +99,9 @@ if($dbLastDate===$now){
                     AND (ue.timeend = 0 OR ue.timeend > NOW()) AND ue.status = 0
                     AND c.id = $attendance->course";
 
-    $sqlDates   =  "SELECT date
+    $sqlDates   =  "SELECT date, id
                     FROM mdl_attendance_detail
-                    GROUP BY date
+                    WHERE attendanceid = $attendance->id
                     ORDER BY date"; 
 
     $students   = $DB->get_records_sql( $sqlStudents);
