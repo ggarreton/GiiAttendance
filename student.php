@@ -59,27 +59,33 @@ $sqlDates       =  "SELECT date, id
                     FROM mdl_attendance_detail
                     WHERE attendanceid = $attendance->id";
 $dates          = $DB->get_records_sql( $sqlDates );
-$table->head    = array('Date','Status');
-// Select the full name of the users that have the rol student in this course
-foreach ($dates as $date) {
-    // Get the current student status for the given date
-    $status     = $DB->get_record_sql(" SELECT attendancestatus 
-                                        FROM mdl_attendance_student_detail 
-                                        WHERE userid            = $USER->id 
-                                        AND attendancedetailid  = $date->id");
-    if($status->attendancestatus === 'Absent'){
-        $nabsent++;
-    }else{
-        $npresent++;
+// Verify if there is attendances to display
+if(count($dates)!=0){
+    $table->head    = array('Date','Status');
+    // Select the full name of the users that have the rol student in this course
+    foreach ($dates as $date) {
+        // Get the current student status for the given date
+        $status     = $DB->get_record_sql(" SELECT attendancestatus 
+                                            FROM mdl_attendance_student_detail 
+                                            WHERE userid            = $USER->id 
+                                            AND attendancedetailid  = $date->id");
+        if($status->attendancestatus === 'Present'){
+            $npresent++;
+        }else{
+            $nabsent++;
+        }
+        // Set the correct icon url for the user status
+        $studentStatus = ($status->attendancestatus === "Present")? 'i/grade_correct' : 'i/grade_incorrect';
+        // Transform the unix timestamp in a day-month format and insert it in the table row along the student status
+        $table->data[] = array(usergetdate($date->date)['mday'].'-'.usergetdate($date->date)['month'], html_writer::empty_tag('input', array('type' => 'image', 'src'=>$OUTPUT->pix_url($studentStatus), 'alt'=>"")));
     }
-    // Transform the unix timestamp in a day-month format and insert it in the table row along the student status
-    $table->data[] = array(usergetdate($date->date)['mday'].'-'.usergetdate($date->date)['month'], $status->attendancestatus);
-}
-// Calculate the mean of the user attendance
-$mean = $npresent/($npresent+$nabsent);
-$table->data[]  = array('% Attendance', percentage($mean));
-$table->data[]  = array('Absents', $nabsent);
-echo html_writer::table($table);    
-    
+    // Calculate the mean of the user attendance
+    $mean = $npresent/($npresent+$nabsent);
+    $table->data[]  = array('% Attendance', percentage($mean));
+    $table->data[]  = array('Absents', $nabsent);
+    echo html_writer::table($table);    
+}else
+echo "There is no attendances to display";
+
 // Finish the page.
 echo $OUTPUT->footer();

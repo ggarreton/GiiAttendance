@@ -62,16 +62,7 @@ class mod_attendance_mod_form extends moodleform_mod {
         // Adding the standard "intro" and "introformat" fields.
         $this->add_intro_editor();
 
-        // Adding the rest of attendance settings, spreading all them into this fieldset
-        // ... or adding more fieldsets ('header' elements) if needed for better logic.
-        $mform->addElement('static', 'label1', 'attendancesetting1', 'Your attendance fields go here. Replace me!');
-
-        $mform->addElement('header', 'attendancefieldset', get_string('attendancefieldset', 'attendance'));
-        $mform->addElement('static', 'label2', 'attendancesetting2', 'Your attendance fields go here. Replace me!');
-
         // Add standard grading elements.
-        $this->standard_grading_coursemodule_elements();
-
         // Add standard elements, common to all modules.
         $this->standard_coursemodule_elements();
 
