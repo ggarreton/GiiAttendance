@@ -61,8 +61,8 @@ if(!is_a_teacher($COURSE, $USER))
 
 // Create Tabs buttons to change between views
 echo '<ul class="nav nav-tabs">
-            <li><a href="teacher2.php?id='.$id.'">'.get_string('takeAttendance', 'mod_attendance').'</a></li>
-            <li class="active"><a href="teacher.php?id='.$id.'">'.get_string('attendanceReview', 'mod_attendance').'</a></li>
+            <li class="active"><a href="teacher2.php?id='.$id.'">'.get_string('takeAttendance', 'mod_attendance').'</a></li>
+            <li><a href="teacher.php?id='.$id.'">'.get_string('attendanceReview', 'mod_attendance').'</a></li>
         </ul>';
 // Create the buttons to redirect to the selected method to take attendance
 echo '<ul class="nav nav-pills nav-stacked">
