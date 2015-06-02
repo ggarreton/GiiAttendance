@@ -86,16 +86,16 @@ echo   '<ul class="nav nav-tabs">
 echo $OUTPUT->heading('Students Attendances');
 // Verify if there is attendances to display
 if(count($dates)!=0){
-    // Defining variables for debugging
-    $npresent       = 0;
-    $nabsent        = 0;
-    $dateCount      = 0;
-    $npresentDay    = array();
-    $nabsentDay     = array();
-    $meanDay        = array();
-    $cont           = 0;
-    $table          = new html_table();
-    $tableHead      = array('Student');
+    // Sets the start point to the variables used to measure the atetndances
+    $numberOfPresents       = 0;
+    $numberOfAbsents        = 0;
+    $dateCount              = 0;
+    $numberOfPresentsDay    = array();
+    $numberOfAbsentsDay     = array();
+    $meanDay                = array();
+    // Start of the table to display
+    $table                  = new html_table();
+    $tableHead              = array('Student');
     // Transform the unix date from the database into a "day-month" format
     foreach ($dates as $date) {
         array_push($tableHead, usergetdate($date->date)["mday"]."-".usergetdate($date->date)["month"]);
@@ -123,29 +123,29 @@ if(count($dates)!=0){
             array_push($row, html_writer::empty_tag('input', array('type' => 'image', 'src'=>$OUTPUT->pix_url($studentStatus), 'alt'=>"")));
             // Increase de number of absents, or present for each student and for the given date
             if($attendanceStatus == "Present"){
-                $npresent++;
-                $npresentDay[$dateCount]++;
+                $numberOfPresents++;
+                $numberOfPresentsDay[$dateCount]++;
             }else{
-                $nabsent++;
-                $nabsentDay[$dateCount]++;
+                $numberOfAbsents++;
+                $numberOfAbsentsDay[$dateCount]++;
             }
             $dateCount++;
         }
         // Calculate the % of attendance for the current student and insert it to the row
-        $mean           = $npresent/($npresent+$nabsent);
+        $mean           = $numberOfPresents/($numberOfPresents+$numberOfAbsents);
         array_push($row, percentage($mean));
         // Add row to de table
         $table->data[]  = $row;
         // Reset Counts
         $dateCount      = 0;    
-        $npresent       = 0;
-        $nabsent        = 0;
+        $numberOfPresents       = 0;
+        $numberOfAbsents        = 0;
     }
     // Create an extra row to summarize the attendance of the course
     $row=array('Class Attendance');
     foreach($dates as $date){ 
         // Calcuate the mean for the given date and add it to the row
-        $meanDay[$dateCount] = $npresentDay[$dateCount]/($npresentDay[$dateCount]+$nabsentDay[$dateCount]);
+        $meanDay[$dateCount] = $numberOfPresentsDay[$dateCount]/($numberOfPresentsDay[$dateCount]+$numberOfAbsentsDay[$dateCount]);
         array_push($row, percentage($meanDay[$dateCount]));
         $dateCount++;
     }
