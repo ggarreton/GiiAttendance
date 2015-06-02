@@ -453,11 +453,19 @@ function attendance_extend_settings_navigation(settings_navigation $settingsnav,
 //                               HERE START WHATEVER WE WANT TO WRITE ABOUT FUNCTIONS                                 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// This function shows me my rol in this course
+/**
+ * This function is called when there is a need to verify the current user role
+ *
+ * @param $role string corresponding to the role to be verified
+ */
 function VerifyRole($role){
     global $COURSE,$USER;
+    // Gets the course context
     $contextCourse = context_course::instance($COURSE->id);
+    // look in the context for the current user's role shortname
     $roleShortname = current(get_user_roles($contextCourse, $USER->id))->shortname;
+    // if the current user's role shortname contains the string in the param $role returns true, if not, false
+    // ej si buscamos como
     if (strpos($roleShortname,$role) !== false) {
         return true;
     }
