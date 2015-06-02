@@ -456,11 +456,11 @@ function attendance_extend_settings_navigation(settings_navigation $settingsnav,
 // This function shows me my rol in this course
 function my_role($COURSE, $USER){
     // I get the context of the course: Where I am?
-    $cContext = context_course::instance($COURSE->id); // global $COURSE
+    $contextCourse = context_course::instance($COURSE->id); // global $COURSE
     // The isset is for debugging
-    if(isset(current(get_user_roles($cContext, $USER->id))->roleid)){
+    if(isset(current(get_user_roles($contextCourse, $USER->id))->roleid)){
         // Second, it's gets the id role of the actual user
-        $id_role = current(get_user_roles($cContext, $USER->id))->roleid;
+        $id_role = current(get_user_roles($contextCourse, $USER->id))->roleid;
     
         // Third, review if the id role is only one or they are more
         // After I need to change the place of the strings and move to lang/en
@@ -491,11 +491,11 @@ function my_role($COURSE, $USER){
 
 function is_a_teacher($COURSE, $USER){
     // I get the context of the course: Where I am?
-    $cContext = context_course::instance($COURSE->id); // global $COURSE
+    $contextCourse = context_course::instance($COURSE->id); // global $COURSE
     // The isset is for debugging
-    if(isset(current(get_user_roles($cContext, $USER->id))->roleid)){
+    if(isset(current(get_user_roles($contextCourse, $USER->id))->roleid)){
         // Second, it's gets the id role of the actual user
-        $id_role = current(get_user_roles($cContext, $USER->id))->roleid;
+        $id_role = current(get_user_roles($contextCourse, $USER->id))->roleid;
     
         // Third, review if the id role is only one or they are more
         // After I need to change the place of the strings and move to lang/en
@@ -521,10 +521,10 @@ function is_a_teacher($COURSE, $USER){
 
 function is_a_student($COURSE, $USER){
     // I get the context of the course: Where I am?
-    $cContext = context_course::instance($COURSE->id); // global $COURSE
+    $contextCourse = context_course::instance($COURSE->id); // global $COURSE
     // The isset is for debugging
-    if(isset(current(get_user_roles($cContext, $USER->id))->roleid)){
-        $id_role = current(get_user_roles($cContext, $USER->id))->roleid;
+    if(isset(current(get_user_roles($contextCourse, $USER->id))->roleid)){
+        $id_role = current(get_user_roles($contextCourse, $USER->id))->roleid;
     
         // Third, review if the id role is only one or they are more
         // After I need to change the place of the strings and move to lang/en
