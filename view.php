@@ -68,12 +68,12 @@ echo $OUTPUT->header();
 
 
 // The user is redirected according to his role in the course
-if(is_a_teacher($COURSE, $USER))
-    redirect('teacher.php?id='.$id);
-else if(is_a_student($COURSE, $USER))
-    redirect('student.php?id='.$id);
-else
-    echo my_role($COURSE, $USER);
+if(is_a_teacher($COURSE, $USER)){
+    redirect('teacher.php?id='.$id);}
+else if(is_a_student($COURSE, $USER)){
+    redirect('student.php?id='.$id);}
+else{
+    echo my_role($COURSE, $USER);}
 
 
 
