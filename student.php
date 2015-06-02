@@ -23,7 +23,7 @@ if ($id) {
     $course     = $DB->get_record('course', array('id' => $attendance->course), '*', MUST_EXIST);
     $cm         = get_coursemodule_from_instance('attendance', $attendance->id, $course->id, false, MUST_EXIST);
 } else {
-    error('You must specify a course_module ID or an instance ID');
+    error(get_string('errorSpecifyInstanceId', 'mod_attendance'));
 }
 require_login($course, true, $cm);
 $event = \mod_attendance\event\course_module_viewed::create(array(
@@ -47,8 +47,8 @@ if(!is_a_student($COURSE, $USER))
 
 // Create Tabs buttons to change between views
 echo   '<ul class="nav nav-tabs">
-            <li><a href="student2.php?id='.$id.'">Mark Attendance</a></li>
-            <li class="active"><a href="student.php?id='.$id.'">My Attendances</a></li>
+            <li><a href="student2.php?id='.$id.'">'.get_string('markAttendance', 'mod_attendance');.'</a></li>
+            <li class="active"><a href="student.php?id='.$id.'">'.get_string('myAttendances', 'mod_attendance');.'</a></li>
         </ul>';
         
 $nabsent        = 0;
@@ -85,7 +85,7 @@ if(count($dates)!=0){
     $table->data[]  = array('Absents', $nabsent);
     echo html_writer::table($table);    
 }else
-echo "There is no attendances to display";
+echo get_string('noAttendances', 'mod_attendance');
 
 // Finish the page.
 echo $OUTPUT->footer();

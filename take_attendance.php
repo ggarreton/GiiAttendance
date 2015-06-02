@@ -37,7 +37,7 @@ if ($id) {
     $course     = $DB->get_record('course', array('id' => $attendance->course), '*', MUST_EXIST);
     $cm         = get_coursemodule_from_instance('attendance', $attendance->id, $course->id, false, MUST_EXIST);
 } else {
-    error('You must specify a course_module ID or an instance ID');
+    error(get_string('errorSpecifyInstanceId', 'mod_attendance'));
 }
 require_login($course, true, $cm);
 $event = \mod_attendance\event\course_module_viewed::create(array(
@@ -120,9 +120,10 @@ if($dbLastDate===$now){
         redirect('teacher.php?id='.$id);
     }
     else{
-        echo $OUTPUT->heading('Pass attendance');
+
+        echo $OUTPUT->heading(get_string('headTakeAttendance', 'mod_attendance'));
         $table = new html_table();
-        $table->head = array('First Name','Last Name', 'Attedance');
+        $table->head = array(get_string('firstName', 'mod_attendance'),get_string('lastName', 'mod_attendance'), get_string('attendanceCapital', 'mod_attendance'));
         foreach ($students as $student) {
             // insert a row for the given student telling the student name, lastname and a checkbox
             $table->data[] = array($student->firstname,$student->lastname, html_writer::empty_tag('input', array('type' => 'checkbox', 'name'=>"publish[]" ,'value' => $student->userid)));

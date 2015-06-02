@@ -23,7 +23,7 @@ if ($id) {
     $course     = $DB->get_record('course', array('id' => $attendance->course), '*', MUST_EXIST);
     $cm         = get_coursemodule_from_instance('attendance', $attendance->id, $course->id, false, MUST_EXIST);
 } else {
-    error('You must specify a course_module ID or an instance ID');
+    error(get_string('errorSpecifyInstanceId', 'mod_attendance'));
 }
 require_login($course, true, $cm);
 $event = \mod_attendance\event\course_module_viewed::create(array(
@@ -47,8 +47,8 @@ if(!is_a_student($COURSE, $USER))
 
 // Create Tabs buttons to change between views
 echo   '<ul class="nav nav-tabs">
-            <li class="active"><a href="student2.php?id='.$id.'">Mark Attendance</a></li>
-            <li><a href="student.php?id='.$id.'">My Attendances</a></li>
+            <li class="active"><a href="student2.php?id='.$id.'">'.get_string('markAttendance', 'mod_attendance').'</a></li>
+            <li><a href="student.php?id='.$id.'">'.get_string('myAttendances', 'mod_attendance').'</a></li>
         </ul>';
 
 
@@ -99,12 +99,12 @@ if(isset($timeRange->starttime) && isset($timeRange->endtime)){
             echo "You are not availeble to mark present";
         }
     }else if( $status->attendancestatus == "Present" ){
-        echo "You are already Present";
+        echo get_string('noAvailebleToMarkPresent', 'mod_attendance');
     }else{
-        echo "There is no attendance to mark";
+        echo get_string('noAttendancesToMark', 'mod_attendance');
     }
 }else
-    echo "There is no attendance to mark";
+    echo get_string('noAttendancesToMark', 'mod_attendance');
     
 
 // Finish the page.

@@ -37,7 +37,7 @@ if ($id) {
     $course     = $DB->get_record('course', array('id' => $attendance->course), '*', MUST_EXIST);
     $cm         = get_coursemodule_from_instance('attendance', $attendance->id, $course->id, false, MUST_EXIST);
 } else {
-    error('You must specify a course_module ID or an instance ID');
+    error(get_string('errorSpecifyInstanceId', 'mod_attendance'));
 }
 require_login($course, true, $cm);
 $event = \mod_attendance\event\course_module_viewed::create(array(
@@ -119,9 +119,9 @@ if(optional_param('enviado',null, PARAM_INTEGER)!=null){
     redirect('teacher.php?id='.$id);
 }
 else{
-    echo $OUTPUT->heading('Edit attendance');
+    echo $OUTPUT->heading(get_string('editAttendance', 'mod_attendance'));
     $table = new html_table();
-    $tableHead=array('First Name','Last Name');
+    $tableHead=array(get_string('firstName', 'mod_attendance'),get_string('lastName', 'mod_attendance'));
     foreach ($dates as $date) {
         array_push($tableHead, usergetdate($date->date)["mday"]."-".usergetdate($date->date)["month"]);
     }

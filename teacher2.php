@@ -37,7 +37,7 @@ if ($id) {
     $course     = $DB->get_record('course', array('id' => $attendance->course), '*', MUST_EXIST);
     $cm         = get_coursemodule_from_instance('attendance', $attendance->id, $course->id, false, MUST_EXIST);
 } else {
-    error('You must specify a course_module ID or an instance ID');
+    error(get_string('errorSpecifyInstanceId', 'mod_attendance')); //'You must specify a course_module ID or an instance ID'
 }
 require_login($course, true, $cm);
 $event = \mod_attendance\event\course_module_viewed::create(array(
@@ -60,13 +60,13 @@ if(!is_a_teacher($COURSE, $USER))
     die(redirect('view.php?id='.$id));
 
 // Create Tabs buttons to change between views
-echo'<ul class="nav nav-tabs">
-<li class="active"><a href="teacher2.php?id='.$id.'">Take Attendance</a></li>
-<li><a href="teacher.php?id='.$id.'">Attendance Review</a></li>
-</ul>';
+echo '<ul class="nav nav-tabs">
+            <li><a href="teacher2.php?id='.$id.'">'.get_string('takeAttendance', 'mod_attendance').'</a></li>
+            <li class="active"><a href="teacher.php?id='.$id.'">'.get_string('attendanceReview', 'mod_attendance').'</a></li>
+        </ul>';
 // Create the buttons to redirect to the selected method to take attendance
 echo '<ul class="nav nav-pills nav-stacked">
-  <li role="presentation"><a href="take_attendance.php?id='.$id.'">Take Attendance</a></li>
-  <li role="presentation"><a href="set_time.php?id='.$id.'">Students Mark Attendances</a></li>
+  <li role="presentation"><a href="take_attendance.php?id='.$id.'">'.get_string('takeAttendance', 'mod_attendance').'</a></li>
+  <li role="presentation"><a href="set_time.php?id='.$id.'">'.get_string('studentsMarkAttendance', 'mod_attendance').'</a></li>
 </ul>';
 echo $OUTPUT->footer();
