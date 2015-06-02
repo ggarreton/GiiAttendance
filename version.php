@@ -21,14 +21,14 @@
  * See https://docs.moodle.org/dev/version.php for more info.
  *
  * @package    mod_attendance
- * @copyright  2015 Your Name <your@email.address>
+ * @copyright  2015 GIA <your@email.address>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_attendance';
-$plugin->version = '2015050100';
+$plugin->version = '2015051600';
 $plugin->release = 'v0.0';
 $plugin->requires = 2014051200;
 $plugin->maturity = MATURITY_ALPHA;

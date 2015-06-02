@@ -22,7 +22,7 @@
  * if you like, and it can span multiple lines.
  *
  * @package    mod_attendance
- * @copyright  2015 Your Name
+ * @copyright  2015 GIA
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -37,3 +37,40 @@ $string['attendancename_help'] = 'This is the content of the help tooltip associ
 $string['attendance'] = 'attendance';
 $string['pluginadministration'] = 'attendance administration';
 $string['pluginname'] = 'attendance';
+$string['start_of_time'] = 'Start of time: ';
+$string['end_of_time'] = 'End of time: ';
+$string['button_save'] = 'Save Channges';
+$string['button_edit'] = 'Edit';
+$string['teacher'] = 'teacher';
+$string['student'] = 'student';
+$string['error_message_not_teacher_not_student'] = "You need to log in as a Teacher or Student to use this feature.";
+$string['present'] = 'Present';
+$string['Present'] = $string['present'];
+$string['absent'] = 'Absent';
+$string['Absent'] = $string['absent'];
+$string['January'] = 'January';
+$string['February'] = 'February';
+$string['March'] = 'March';
+$string['April'] = 'April';
+$string['May'] = 'May';
+$string['June'] = 'June';
+$string['July'] = 'July';
+$string['August'] = 'August';
+$string['September'] = 'September';
+$string['October'] = 'October';
+$string['November'] = 'November';
+$string['December'] = 'December';
+$string['errorSpecifyInstanceId'] = 'There was a critical error (#10001), please contact your IT support.';
+$string['markAttendance'] = 'Mark Attendance';
+$string['myAttendances'] = 'My Attendances';
+$string['noAttendances'] = 'There is no attendances to display';
+$string['takeAttendance'] = 'Take Attendance';
+$string['attendanceReview'] = 'Attendance Review';
+$string['studentsMarkAttendance'] = 'Students Mark Attendances';
+$string['headTakeAttendance'] = 'Pass atendance';
+$string['firstName'] = 'First Name';
+$string['lastName'] = 'Last Name';
+$string['attendanceCapital'] = 'Attendance';
+$string['noAttendancesToMark'] = 'There is no attendances to mark';
+$string['noAvailebleToMarkPresent'] = 'You are not availeble to mark present';
+$string['editAttendance'] = 'Edit attendance';
