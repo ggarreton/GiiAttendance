@@ -60,8 +60,10 @@ $PAGE->set_heading(format_string($course->fullname));
 // Output starts here.
 echo $OUTPUT->header();
 // If the user is not a teacher redirects to view.php
-if(!is_a_teacher($COURSE, $USER))
+if(!VerifyRole('teacher')){
     die(redirect('view.php?id='.$id));
+}
+
 $sqlStudents=  "SELECT DISTINCT u.id AS userid, u.firstname, u.lastname
                 FROM mdl_user u
                 JOIN mdl_user_enrolments ue ON ue.userid = u.id

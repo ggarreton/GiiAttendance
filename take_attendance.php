@@ -61,8 +61,10 @@ $PAGE->set_heading(format_string($course->fullname));
 echo $OUTPUT->header();
 
 // If the user is not a teacher redirects to view.php
-if(!is_a_teacher($COURSE, $USER))
+if(!VerifyRole('teacher')){
     die(redirect('view.php?id='.$id));
+}
+
 $sqlLastDate=  "SELECT  date 
                 FROM mdl_attendance_detail
                 WHERE attendanceid = $attendance->id
@@ -78,9 +80,9 @@ $now        = usergetdate(time())['mday'].'-'.usergetdate(time())['month'].'-'.u
 // Verify if the text are equals
 if($dbLastDate===$now){
     //  Give the error message and a return button
-    echo "There is alredy an attendance for today";
+    echo get_string('already_passed_attendance', 'mod_attendance');
     echo   '<ul class="nav nav-tabs">
-            <li><a href="teacher.php?id='.$id.'">Return</a></li>
+            <li><a href="teacher.php?id='.$id.'">'.get_string('return', 'mod_attendance').'</a></li>
         </ul>';
 }else{
     $sqlStudents=  "SELECT DISTINCT u.id AS userid, u.firstname, u.lastname

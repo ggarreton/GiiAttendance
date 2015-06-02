@@ -454,98 +454,17 @@ function attendance_extend_settings_navigation(settings_navigation $settingsnav,
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // This function shows me my rol in this course
-function my_role($COURSE, $USER){
-    // I get the context of the course: Where I am?
-    $contextCourse = context_course::instance($COURSE->id); // global $COURSE
-    // The isset is for debugging
-    if(isset(current(get_user_roles($contextCourse, $USER->id))->roleid)){
-        // Second, it's gets the id role of the actual user
-        $id_role = current(get_user_roles($contextCourse, $USER->id))->roleid;
-    
-        // Third, review if the id role is only one or they are more
-        // After I need to change the place of the strings and move to lang/en
-        if(is_array($id_role)){
-            foreach ($id_role as $key => $value) {
-                if($value == 3){
-                    $message=get_string('teacher', 'mod_attendance');
-                }elseif ($value == 5) {
-                    $message=get_string('student', 'mod_attendance');
-                }else{
-                    $message=get_string('error_message_not_teacher_not_student', 'mod_attendance');
-                }        
-            }
-        }else{
-            if($id_role == 3){
-                $message=get_string('teacher', 'mod_attendance');
-            }elseif ($id_role == 5) {
-                $message=get_string('student', 'mod_attendance');
-            }else{
-                $message=get_string('error_message_not_teacher_not_student', 'mod_attendance');
-            }
-        }
-
-        // Show the message
-        return $message;
+function VerifyRole($role){
+    global $COURSE,$USER;
+    $contextCourse = context_course::instance($COURSE->id);
+    $roleShortname = current(get_user_roles($contextCourse, $USER->id))->shortname;
+    if (strpos($roleShortname,$role) !== false) {
+        return true;
     }
-}
-
-function is_a_teacher($COURSE, $USER){
-    // I get the context of the course: Where I am?
-    $contextCourse = context_course::instance($COURSE->id); // global $COURSE
-    // The isset is for debugging
-    if(isset(current(get_user_roles($contextCourse, $USER->id))->roleid)){
-        // Second, it's gets the id role of the actual user
-        $id_role = current(get_user_roles($contextCourse, $USER->id))->roleid;
-    
-        // Third, review if the id role is only one or they are more
-        // After I need to change the place of the strings and move to lang/en
-        if(is_array($id_role)){
-            foreach ($id_role as $key => $value) {
-                if($value == 3){
-                    $is_a_teacher=true;
-                }else{
-                    $is_a_teacher=false;
-                }        
-            }
-        }else{
-            if($id_role == 3){
-                $is_a_teacher=true;
-            }else{
-                $is_a_teacher=false;
-            }
-        }
-
-        return $is_a_teacher;    
+    else{
+        return false;
     }
-}
 
-function is_a_student($COURSE, $USER){
-    // I get the context of the course: Where I am?
-    $contextCourse = context_course::instance($COURSE->id); // global $COURSE
-    // The isset is for debugging
-    if(isset(current(get_user_roles($contextCourse, $USER->id))->roleid)){
-        $id_role = current(get_user_roles($contextCourse, $USER->id))->roleid;
-    
-        // Third, review if the id role is only one or they are more
-        // After I need to change the place of the strings and move to lang/en
-        if(is_array($id_role)){
-            foreach ($id_role as $key => $value) {
-                if($value == 5){
-                    $is_a_student=true;
-                }else{
-                    $is_a_student=false;
-                }        
-            }
-        }else{
-            if($id_role == 5){
-                $is_a_student=true;
-            }else{
-                $is_a_student=false;
-            }
-        }
-
-        return $is_a_student;    
-    }
 }
 
 

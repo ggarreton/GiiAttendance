@@ -56,8 +56,9 @@ $PAGE->set_heading(format_string($course->fullname));
 echo $OUTPUT->header();
 
 // If the user is not a teacher redirects to view.php
-if(!is_a_teacher($COURSE, $USER))
+if(!VerifyRole('teacher')){
     die(redirect('view.php?id='.$id));
+}
 
 // The sql gets the list of students enroled in the current course and realice all the verifications so the user is active, not deleted, etc
 $sqlUsers= "SELECT DISTINCT u.id AS userid, u.firstname, u.lastname
@@ -83,7 +84,7 @@ echo   '<ul class="nav nav-tabs">
             <li><a href="teacher2.php?id='.$id.'">'.get_string('takeAttendance', 'mod_attendance').'</a></li>
             <li class="active"><a href="teacher.php?id='.$id.'">'.get_string('attendanceReview', 'mod_attendance').'</a></li>
         </ul>';
-echo $OUTPUT->heading('Students Attendances');
+echo $OUTPUT->heading(get_string('StudentsAttendances', 'mod_attendance'));
 // Verify if there is attendances to display
 if(count($dates)!=0){
     // Sets the start point to the variables used to measure the atetndances
@@ -95,7 +96,7 @@ if(count($dates)!=0){
     $meanDay                = array();
     // Start of the table to display
     $table                  = new html_table();
-    $tableHead              = array('Student');
+    $tableHead              = array(get_string('student', 'mod_attendance'));
     // Transform the unix date from the database into a "day-month" format
     foreach ($dates as $date) {
         array_push($tableHead, usergetdate($date->date)["mday"]."-".usergetdate($date->date)["month"]);

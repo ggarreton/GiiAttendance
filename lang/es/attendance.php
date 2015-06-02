@@ -74,3 +74,6 @@ $string['attendanceCapital'] = 'Asistencias';
 $string['noAttendancesToMark'] = 'No hay asistencias que marcar.';
 $string['noAvailebleToMarkPresent'] = 'No estás autorizado a marcar presente.';
 $string['editAttendance'] = 'Editar asistencias';
+$string['StudentsAttendances'] = 'Asistencia Alumnos';
+$string['already_passed_attendance'] = 'Ya hay una asistencia este día';
+$string['return'] = 'Volver';

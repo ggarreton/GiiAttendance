@@ -41,9 +41,10 @@ $PAGE->set_heading(format_string($course->fullname));
 // Output starts here.
 echo $OUTPUT->header();
 
-// If the user is not a student redirects to view.php
-if(!is_a_student($COURSE, $USER))
+// If the user is not a teacher redirects to view.php
+if(!VerifyRole('student')){
     die(redirect('view.php?id='.$id));
+}
 
 // Create Tabs buttons to change between views
 echo   '<ul class="nav nav-tabs">
