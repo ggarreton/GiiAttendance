@@ -94,8 +94,7 @@ if(count($dates)!=0){
     $numberOfPresentsDay    = array();
     $numberOfAbsentsDay     = array();
     $meanDay                = array();
-    // Start of the table to display
-    $table                  = new html_table();
+
     $tableHead              = array(get_string('student', 'mod_attendance'));
     // Transform the unix date from the database into a "day-month" format
     foreach ($dates as $date) {
@@ -106,53 +105,43 @@ if(count($dates)!=0){
     // Insert in an array the headers to be used in the table
     $table->head = $tableHead;
 
-    foreach ($students as $student) {
-        // Create a row whit the user name and lastname in the first column
-        $row    = array($student->firstname." ".$student->lastname);
-        foreach($dates as $date){   
-            $sqlStatus  =  "SELECT sd.attendancestatus 
-                            FROM mdl_attendance_student_detail sd, mdl_attendance_detail ad 
-                            WHERE sd.attendancedetailid=ad.id
-                            AND sd.attendancedetailid=$date->id
-                            AND ad.date=$date->date 
-                            AND sd.userid=$student->userid";
-            // Get student attendance status for the given date
-            $attendanceStatus   = $DB->get_record_sql( $sqlStatus )->attendancestatus;
-            // Set the correct icon url for the user status
-            $studentStatus = ($attendanceStatus === "Present")? 'i/grade_correct' : 'i/grade_incorrect';
-            // Insert in the table the icon corresponding to the user status
-            array_push($row, html_writer::empty_tag('input', array('type' => 'image', 'src'=>$OUTPUT->pix_url($studentStatus), 'alt'=>"")));
-            // Increase de number of absents, or present for each student and for the given date
-            if($attendanceStatus == "Present"){
-                $numberOfPresents++;
-                $numberOfPresentsDay[$dateCount]++;
-            }else{
-                $numberOfAbsents++;
-                $numberOfAbsentsDay[$dateCount]++;
-            }
-            $dateCount++;
-        }
-        // Calculate the % of attendance for the current student and insert it to the row
+
+
+    $table         = new html_table();
+    $table->head   = $tableHead;
+    // in the SQL the if is made so it returns directly the url for the image to use (from the standerd image library in moodle)
+    $sqlStatus     =  " SELECT sd.id,sd.userid,ad.date ,if((sd.attendancestatus!= 'present'),'i/grade_correct','i/grade_incorrect') status
+                        FROM mdl_attendance_student_detail sd, mdl_attendance_detail ad 
+                        WHERE sd.attendancedetailid=ad.id
+                        AND ad.attendanceid= $attendance->id
+                        order by ad.date";
+    // Get student attendance status for the given date
+    $attendanceStatus   = $DB->get_records_sql( $sqlStatus );
+    foreach($attendanceStatus as $oneStatus)
+    {   
+        // Transform the attendanceStatus object array in a more friendly and easy to use bidimensional array, whit the first key as the user id, and the second as the date
+        // as a value the image input is inserted using the directory given by the query
+        $StatusArray[$oneStatus->userid][$oneStatus->date]=html_writer::empty_tag('input', array('type' => 'image', 'src'=>$OUTPUT->pix_url($oneStatus->status), 'alt'=>""));
+    }
+
+    foreach($students as $student)
+    {
+        //Create a row  whit de values of the current user status from all dates (pre sorted in the querry)
+        $row =array_values($StatusArray[$student->userid]);
+        // Get the number of inputs representing a present in the row (url='i/grade_correct')
+        $numberOfPresents= array_count_values($row)[html_writer::empty_tag('input', array('type' => 'image', 'src'=>$OUTPUT->pix_url('i/grade_correct'), 'alt'=>""))];      
+        // Get the number of inputs representing a absent in the row (url='i/grade_incorrect')
+        $numberOfAbsents= array_count_values($row)[html_writer::empty_tag('input', array('type' => 'image', 'src'=>$OUTPUT->pix_url('i/grade_incorrect'), 'alt'=>""))];
+        // Calculate the row attendance % and push it at the end of the row array
         $mean           = $numberOfPresents/($numberOfPresents+$numberOfAbsents);
         array_push($row, percentage($mean));
-        // Add row to de table
-        $table->data[]  = $row;
-        // Reset Counts
-        $dateCount      = 0;    
-        $numberOfPresents       = 0;
-        $numberOfAbsents        = 0;
+        // Add at the begining of the row array the name-lastname of the student that the info belongs to
+        array_unshift($row, $student->firstname." ".$student->lastname);
+        // Add the row to the tableData array
+       $tableData[]=$row;
     }
-    // Create an extra row to summarize the attendance of the course
-    $row=array('Class Attendance');
-    foreach($dates as $date){ 
-        // Calcuate the mean for the given date and add it to the row
-        $meanDay[$dateCount] = $numberOfPresentsDay[$dateCount]/($numberOfPresentsDay[$dateCount]+$numberOfAbsentsDay[$dateCount]);
-        array_push($row, percentage($meanDay[$dateCount]));
-        $dateCount++;
-    }
-    // Calculate the total attendance and add it to the row
-    array_push($row,  percentage(array_sum($meanDay)/count($meanDay)));
-    $table->data[] = $row;
+    // assing the tableData array as the data of the array and print the table
+    $table->data=$tableData;
     echo html_writer::table($table);
 
     echo '<ul class="nav nav-pills nav-stacked">
