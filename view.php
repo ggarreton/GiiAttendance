@@ -1,3 +1,11 @@
+<script>
+function changeToPresent() {
+    updateStudentAttendace($COURSE,$studentId,"Present","1234");
+}
+function changeToAbsent() {
+    updateStudentAttendace($COURSE,$studentId,"Absent","1234");
+}
+</script>
 <?php
 // This file is part of Moodle - http://moodle.org/
 //
@@ -65,19 +73,55 @@ $PAGE->set_heading(format_string($course->fullname));
 // Output starts here.
 echo $OUTPUT->header();
 
+// Print formatted date in user time.
+// Look the list of joins to know what are the expression u, c, e, ue, ra and ct
+$sql=  "SELECT DISTINCT u.id AS userid, c.id AS courseid
+        FROM mdl_user u
+        JOIN mdl_user_enrolments ue ON ue.userid = u.id
+        JOIN mdl_enrol e ON e.id = ue.enrolid
+        JOIN mdl_role_assignments ra ON ra.userid = u.id
+        JOIN mdl_context ct ON ct.id = ra.contextid AND ct.contextlevel = 50
+        JOIN mdl_course c ON c.id = ct.instanceid AND e.courseid = c.id
+        JOIN mdl_role r ON r.id = ra.roleid AND r.shortname = 'student'
+        WHERE e.status = 0 AND u.suspended = 0 AND u.deleted = 0
+        AND (ue.timeend = 0 OR ue.timeend > NOW()) AND ue.status = 0
+        AND c.id = $attendance->course";
 
-// The user is redirected according to his role in the course
-if(is_a_teacher($COURSE, $USER))
-    redirect('teacher.php?id='.$id);
-else if(is_a_student($COURSE, $USER))
-    redirect('student.php?id='.$id);
-else
-    echo my_role($COURSE, $USER);
+$students = $DB->get_records_sql($sql);
+echo $OUTPUT->heading('Yay! It works!');
 
 
+$table = new html_table();
+$table->head = array('First Name','Last Name', 'Attedance');
+
+foreach ($students as $student) {
+    $name = $DB->get_record_sql("SELECT u.firstname, u.lastname, u.id FROM mdl_user u WHERE u.id = $student->userid");
+    $table->data[] = array($name->firstname,$name->lastname, html_writer::empty_tag('input', array('type' => 'checkbox', 'name' => $student->userid)));
+}
+if(isset($_POST['enviado'])){
+    $time = time();
+    $records                        = new stdClass();
+    $records->attendanceid          = $attendance->id;
+    $records->attendancetipe        = 'by_teacher';
+    $records->date                  = $time;
+
+    $lastInsertId = $DB->insert_record('attendance_detail', $records);
+    
+    foreach ($students as $student) {
+        $records                        = new stdClass();
+        $records->attendancedetailid    = $lastInsertId;
+        $records->userid                = $student->userid;
+        $records->attendancestatus      = (isset($_POST[$student->userid])) ? "present" : "ausent";
+        $DB->insert_record('attendance_student_detail', $records);
+    }
+}
+else{
+    echo html_writer::start_tag('form', array('action' => $PAGE->url, 'method' => 'post'));
+    echo html_writer::table($table);
+    echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'enviado', 'value' => 1));
+    echo html_writer::empty_tag('input', array('type' => 'submit', 'name' => 'enviar'));
+    echo html_writer::end_tag('form');
+}
 
 // Finish the page.
 echo $OUTPUT->footer();
-
-
-
