@@ -34,13 +34,13 @@ $id = optional_param('id', 0, PARAM_INT); // Course_module ID, or
 $n  = optional_param('n', 0, PARAM_INT);  // ... attendance instance ID - it should be named as the first character of the module.
 
 if ($id) {
-    $courseModule         = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
-    $course     = $DB->get_record('course', array('id' => $courseModule->course), '*', MUST_EXIST);
-    $attendance  = $DB->get_record('attendance', array('id' => $courseModule->instance), '*', MUST_EXIST);
+    $courseModule           = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
+    $course                 = $DB->get_record('course', array('id' => $courseModule->course), '*', MUST_EXIST);
+    $attendance             = $DB->get_record('attendance', array('id' => $courseModule->instance), '*', MUST_EXIST);
 } else if ($n) {
-    $attendance  = $DB->get_record('attendance', array('id' => $n), '*', MUST_EXIST);
-    $course     = $DB->get_record('course', array('id' => $attendance->course), '*', MUST_EXIST);
-    $courseModule         = get_coursemodule_from_instance('attendance', $attendance->id, $course->id, false, MUST_EXIST);
+    $attendance             = $DB->get_record('attendance', array('id' => $n), '*', MUST_EXIST);
+    $course                 = $DB->get_record('course', array('id' => $attendance->course), '*', MUST_EXIST);
+    $courseModule           = get_coursemodule_from_instance('attendance', $attendance->id, $course->id, false, MUST_EXIST);
 } else {
     error(get_string('errorSpecifyInstanceId', 'mod_attendance')); //'You must specify a course_module ID or an instance ID'
    
