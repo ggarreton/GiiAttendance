@@ -453,35 +453,24 @@ function attendance_extend_settings_navigation(settings_navigation $settingsnav,
 //                               HERE START WHATEVER WE WANT TO WRITE ABOUT FUNCTIONS                                 //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// This function shows me my rol in this course
-function my_role($COURSE, $USER){
-    // I get the context of the course: Where I am?
-    $cContext = context_course::instance($COURSE->id); // global $COURSE
-    // Second, it's gets the id role of the actual user
-    $id_role = current(get_user_roles($cContext, $USER->id))->roleid;
-
-    // Third, review if the id role is only one or they are more
-    // After I need to change the place of the strings and move to lang/en
-    if(is_array($id_role)){
-        foreach ($id_role as $key => $value) {
-            if($value == 3){
-                $message="I'm a teacher";
-            }elseif ($value == 5) {
-                $message="I'm a student";
-            }else{
-                $message="I'm not a teacher or a student";
-            }        
-        }
-    }else{
-        if($id_role == 3){
-            $message="I'm a teacher";
-        }elseif ($id_role == 5) {
-            $message="I'm a student";
-        }else{
-            $message="I'm not a teacher or a student";
-        }
-
-        return $is_a_student;    
+/**
+ * This function is called when there is a need to verify the current user role
+ *
+ * @param $role string corresponding to the role to be verified
+ */
+function VerifyRole($role){
+    global $COURSE,$USER;
+    // Gets the course context
+    $contextCourse = context_course::instance($COURSE->id);
+    // look in the context for the current user's role shortname
+    $roleShortname = current(get_user_roles($contextCourse, $USER->id))->shortname;
+    // if the current user's role shortname contains the string in the param $role returns true, if not, false
+    // ej si buscamos como
+    if (strpos($roleShortname,$role) !== false) {
+        return true;
+    }
+    else{
+        return false;
     }
 }
 

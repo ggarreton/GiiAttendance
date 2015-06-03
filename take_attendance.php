@@ -29,17 +29,17 @@ require_once(dirname(__FILE__).'/lib.php');
 $id = optional_param('id', 0, PARAM_INT); // Course_module ID, or
 $n  = optional_param('n', 0, PARAM_INT);  // ... attendance instance ID - it should be named as the first character of the module.
 if ($id) {
-    $cm         = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
-    $course     = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-    $attendance  = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
+    $courseModule         = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
+    $course     = $DB->get_record('course', array('id' => $courseModule->course), '*', MUST_EXIST);
+    $attendance  = $DB->get_record('attendance', array('id' => $courseModule->instance), '*', MUST_EXIST);
 } else if ($n) {
     $attendance  = $DB->get_record('attendance', array('id' => $n), '*', MUST_EXIST);
     $course     = $DB->get_record('course', array('id' => $attendance->course), '*', MUST_EXIST);
-    $cm         = get_coursemodule_from_instance('attendance', $attendance->id, $course->id, false, MUST_EXIST);
+    $courseModule         = get_coursemodule_from_instance('attendance', $attendance->id, $course->id, false, MUST_EXIST);
 } else {
-    error('You must specify a course_module ID or an instance ID');
+    error(get_string('errorSpecifyInstanceId', 'mod_attendance'));
 }
-require_login($course, true, $cm);
+require_login($course, true, $courseModule);
 $event = \mod_attendance\event\course_module_viewed::create(array(
     'objectid' => $PAGE->cm->instance,
     'context' => $PAGE->context,
@@ -48,7 +48,7 @@ $event->add_record_snapshot('course', $PAGE->course);
 $event->add_record_snapshot($PAGE->cm->modname, $attendance);
 $event->trigger();
 // Print the page header.
-$PAGE->set_url('/mod/attendance/take_attendance.php', array('id' => $cm->id));
+$PAGE->set_url('/mod/attendance/take_attendance.php', array('id' => $courseModule->id));
 $PAGE->set_title(format_string($attendance->name));
 $PAGE->set_heading(format_string($course->fullname));
 /*
@@ -61,8 +61,10 @@ $PAGE->set_heading(format_string($course->fullname));
 echo $OUTPUT->header();
 
 // If the user is not a teacher redirects to view.php
-if(!is_a_teacher($COURSE, $USER))
+if(!VerifyRole('teacher')){
     die(redirect('view.php?id='.$id));
+}
+
 $sqlLastDate=  "SELECT  date 
                 FROM mdl_attendance_detail
                 WHERE attendanceid = $attendance->id
@@ -78,9 +80,9 @@ $now        = usergetdate(time())['mday'].'-'.usergetdate(time())['month'].'-'.u
 // Verify if the text are equals
 if($dbLastDate===$now){
     //  Give the error message and a return button
-    echo "There is alredy an attendance for today";
+    echo get_string('already_passed_attendance', 'mod_attendance');
     echo   '<ul class="nav nav-tabs">
-            <li><a href="teacher.php?id='.$id.'">Return</a></li>
+            <li><a href="teacher.php?id='.$id.'">'.get_string('return', 'mod_attendance').'</a></li>
         </ul>';
 }else{
     $sqlStudents=  "SELECT DISTINCT u.id AS userid, u.firstname, u.lastname
@@ -120,9 +122,10 @@ if($dbLastDate===$now){
         redirect('teacher.php?id='.$id);
     }
     else{
-        echo $OUTPUT->heading('Pass attendance');
+
+        echo $OUTPUT->heading(get_string('headTakeAttendance', 'mod_attendance'));
         $table = new html_table();
-        $table->head = array('First Name','Last Name', 'Attedance');
+        $table->head = array(get_string('firstName', 'mod_attendance'),get_string('lastName', 'mod_attendance'), get_string('attendanceCapital', 'mod_attendance'));
         foreach ($students as $student) {
             // insert a row for the given student telling the student name, lastname and a checkbox
             $table->data[] = array($student->firstname,$student->lastname, html_writer::empty_tag('input', array('type' => 'checkbox', 'name'=>"publish[]" ,'value' => $student->userid)));
