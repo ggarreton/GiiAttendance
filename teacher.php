@@ -106,7 +106,7 @@ if(count($dates)!=0){
     $table         = new html_table();
     $table->head   = $tableHead;
     // in the SQL the if is made so it returns directly the url for the image to use (from the standerd image library in moodle)
-    $sqlStatus     =  " SELECT sd.id,sd.userid,ad.date ,if((sd.attendancestatus!= 'present'),'i/grade_correct','i/grade_incorrect') status
+    $sqlStatus     =  " SELECT sd.id,sd.userid,ad.date ,if((sd.attendancestatus!= 'present'),'i/grade_incorrect','i/grade_correct') status
                         FROM mdl_attendance_student_detail sd, mdl_attendance_detail ad 
                         WHERE sd.attendancedetailid=ad.id
                         AND ad.attendanceid= $attendance->id
@@ -126,11 +126,13 @@ if(count($dates)!=0){
         //Create a row  whit de values of the current user status from all dates (pre sorted in the querry)
         $row =array_values($StatusArray[$student->userid]);
         // Get the number of inputs representing a present in the row (url='i/grade_correct')
-        $numberOfPresents   = array_count_values($row)[html_writer::empty_tag('input', array('type' => 'image', 
-            'src'=>$OUTPUT->pix_url('i/grade_correct'), 'alt'=>""))];      
+        $numberOfPresents   = (isset(array_count_values($row)[html_writer::empty_tag('input', array('type' => 'image', 
+            'src'=>$OUTPUT->pix_url('i/grade_correct'), 'alt'=>""))]))? array_count_values($row)[html_writer::empty_tag('input', array('type' => 'image', 
+            'src'=>$OUTPUT->pix_url('i/grade_correct'), 'alt'=>""))]:0;      
         // Get the number of inputs representing a absent in the row (url='i/grade_incorrect')
-        $numberOfAbsents    = array_count_values($row)[html_writer::empty_tag('input', array('type' => 'image', 
-            'src'=>$OUTPUT->pix_url('i/grade_incorrect'), 'alt'=>""))];
+        $numberOfAbsents    = (isset(array_count_values($row)[html_writer::empty_tag('input', array('type' => 'image', 
+            'src'=>$OUTPUT->pix_url('i/grade_incorrect'), 'alt'=>""))]))? array_count_values($row)[html_writer::empty_tag('input', array('type' => 'image', 
+            'src'=>$OUTPUT->pix_url('i/grade_incorrect'), 'alt'=>""))]:0;
         // Calculate the row attendance % and push it at the end of the row array
         $mean               = $numberOfPresents/($numberOfPresents+$numberOfAbsents);
         array_push($row, percentage($mean));
