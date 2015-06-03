@@ -29,17 +29,17 @@ require_once(dirname(__FILE__).'/lib.php');
 $id = optional_param('id', 0, PARAM_INT); // Course_module ID, or
 $n  = optional_param('n', 0, PARAM_INT);  // ... attendance instance ID - it should be named as the first character of the module.
 if ($id) {
-    $cm         = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
-    $course     = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-    $attendance  = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
+    $courseModule         = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
+    $course     = $DB->get_record('course', array('id' => $courseModule->course), '*', MUST_EXIST);
+    $attendance  = $DB->get_record('attendance', array('id' => $courseModule->instance), '*', MUST_EXIST);
 } else if ($n) {
     $attendance  = $DB->get_record('attendance', array('id' => $n), '*', MUST_EXIST);
     $course     = $DB->get_record('course', array('id' => $attendance->course), '*', MUST_EXIST);
-    $cm         = get_coursemodule_from_instance('attendance', $attendance->id, $course->id, false, MUST_EXIST);
+    $courseModule         = get_coursemodule_from_instance('attendance', $attendance->id, $course->id, false, MUST_EXIST);
 } else {
-    error('You must specify a course_module ID or an instance ID');
+    error(get_string('errorSpecifyInstanceId', 'mod_attendance'));
 }
-require_login($course, true, $cm);
+require_login($course, true, $courseModule);
 $event = \mod_attendance\event\course_module_viewed::create(array(
     'objectid' => $PAGE->cm->instance,
     'context' => $PAGE->context,
@@ -48,7 +48,7 @@ $event->add_record_snapshot('course', $PAGE->course);
 $event->add_record_snapshot($PAGE->cm->modname, $attendance);
 $event->trigger();
 // Print the page header.
-$PAGE->set_url('/mod/attendance/edit_attendance.php', array('id' => $cm->id));
+$PAGE->set_url('/mod/attendance/edit_attendance.php', array('id' => $courseModule->id));
 $PAGE->set_title(format_string($attendance->name));
 $PAGE->set_heading(format_string($course->fullname));
 /*
@@ -60,8 +60,10 @@ $PAGE->set_heading(format_string($course->fullname));
 // Output starts here.
 echo $OUTPUT->header();
 // If the user is not a teacher redirects to view.php
-if(!is_a_teacher($COURSE, $USER))
+if(!VerifyRole('teacher')){
     die(redirect('view.php?id='.$id));
+}
+
 $sqlStudents=  "SELECT DISTINCT u.id AS userid, u.firstname, u.lastname
                 FROM mdl_user u
                 JOIN mdl_user_enrolments ue ON ue.userid = u.id
@@ -119,9 +121,9 @@ if(optional_param('enviado',null, PARAM_INTEGER)!=null){
     redirect('teacher.php?id='.$id);
 }
 else{
-    echo $OUTPUT->heading('Edit attendance');
+    echo $OUTPUT->heading(get_string('editAttendance', 'mod_attendance'));
     $table = new html_table();
-    $tableHead=array('First Name','Last Name');
+    $tableHead=array(get_string('firstName', 'mod_attendance'),get_string('lastName', 'mod_attendance'));
     foreach ($dates as $date) {
         array_push($tableHead, usergetdate($date->date)["mday"]."-".usergetdate($date->date)["month"]);
     }

@@ -29,17 +29,17 @@ require_once(dirname(__FILE__).'/lib.php');
 $id = optional_param('id', 0, PARAM_INT); // Course_module ID, or
 $n  = optional_param('n', 0, PARAM_INT);  // ... attendance instance ID - it should be named as the first character of the module.
 if ($id) {
-    $cm         = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
-    $course     = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-    $attendance = $DB->get_record('attendance', array('id' => $cm->instance), '*', MUST_EXIST);
+    $courseModule         = get_coursemodule_from_id('attendance', $id, 0, false, MUST_EXIST);
+    $course     = $DB->get_record('course', array('id' => $courseModule->course), '*', MUST_EXIST);
+    $attendance = $DB->get_record('attendance', array('id' => $courseModule->instance), '*', MUST_EXIST);
 } else if ($n) {
     $attendance = $DB->get_record('attendance', array('id' => $n), '*', MUST_EXIST);
     $course     = $DB->get_record('course', array('id' => $attendance->course), '*', MUST_EXIST);
-    $cm         = get_coursemodule_from_instance('attendance', $attendance->id, $course->id, false, MUST_EXIST);
+    $courseModule         = get_coursemodule_from_instance('attendance', $attendance->id, $course->id, false, MUST_EXIST);
 } else {
-    error('You must specify a course_module ID or an instance ID');
+    error(get_string('errorSpecifyInstanceId', 'mod_attendance')); //'You must specify a course_module ID or an instance ID'
 }
-require_login($course, true, $cm);
+require_login($course, true, $courseModule);
 $event = \mod_attendance\event\course_module_viewed::create(array(
     'objectid'  => $PAGE->cm->instance,
     'context'   => $PAGE->context,
@@ -48,7 +48,7 @@ $event->add_record_snapshot('course', $PAGE->course);
 $event->add_record_snapshot($PAGE->cm->modname, $attendance);
 $event->trigger();
 // Print the page header.
-$PAGE->set_url('/mod/attendance/teacher.php', array('id' => $cm->id));
+$PAGE->set_url('/mod/attendance/teacher.php', array('id' => $courseModule->id));
 $PAGE->set_title(format_string($attendance->name));
 $PAGE->set_heading(format_string($course->fullname));
 
@@ -56,8 +56,9 @@ $PAGE->set_heading(format_string($course->fullname));
 echo $OUTPUT->header();
 
 // If the user is not a teacher redirects to view.php
-if(!is_a_teacher($COURSE, $USER))
+if(!VerifyRole('teacher')){
     die(redirect('view.php?id='.$id));
+}
 
 // The sql gets the list of students enroled in the current course and realice all the verifications so the user is active, not deleted, etc
 $sqlUsers= "SELECT DISTINCT u.id AS userid, u.firstname, u.lastname
@@ -80,22 +81,21 @@ $students   = $DB->get_records_sql( $sqlUsers);
 $dates      = $DB->get_records_sql( $sqlDates);
 // Create Tabs buttons to change between views
 echo   '<ul class="nav nav-tabs">
-            <li><a href="teacher2.php?id='.$id.'">Take Attendance</a></li>
-            <li class="active"><a href="teacher.php?id='.$id.'">Attendance Review</a></li>
+            <li><a href="teacher2.php?id='.$id.'">'.get_string('takeAttendance', 'mod_attendance').'</a></li>
+            <li class="active"><a href="teacher.php?id='.$id.'">'.get_string('attendanceReview', 'mod_attendance').'</a></li>
         </ul>';
-echo $OUTPUT->heading('Students Attendances');
+echo $OUTPUT->heading(get_string('StudentsAttendances', 'mod_attendance'));
 // Verify if there is attendances to display
 if(count($dates)!=0){
-    // Defining variables for debugging
-    $npresent       = 0;
-    $nabsent        = 0;
-    $dateCount      = 0;
-    $npresentDay    = array();
-    $nabsentDay     = array();
-    $meanDay        = array();
-    $cont           = 0;
-    $table          = new html_table();
-    $tableHead      = array('Student');
+    // Sets the start point to the variables used to measure the atetndances
+    $numberOfPresents       = 0;
+    $numberOfAbsents        = 0;
+    $dateCount              = 0;
+    $numberOfPresentsDay    = array();
+    $numberOfAbsentsDay     = array();
+    $meanDay                = array();
+
+    $tableHead              = array(get_string('student', 'mod_attendance'));
     // Transform the unix date from the database into a "day-month" format
     foreach ($dates as $date) {
         array_push($tableHead, usergetdate($date->date)["mday"]."-".usergetdate($date->date)["month"]);
@@ -105,59 +105,49 @@ if(count($dates)!=0){
     // Insert in an array the headers to be used in the table
     $table->head = $tableHead;
 
-    foreach ($students as $student) {
-        // Create a row whit the user name and lastname in the first column
-        $row    = array($student->firstname." ".$student->lastname);
-        foreach($dates as $date){   
-            $sqlStatus  =  "SELECT sd.attendancestatus 
-                            FROM mdl_attendance_student_detail sd, mdl_attendance_detail ad 
-                            WHERE sd.attendancedetailid=ad.id
-                            AND sd.attendancedetailid=$date->id
-                            AND ad.date=$date->date 
-                            AND sd.userid=$student->userid";
-            // Get student attendance status for the given date
-            $attendanceStatus   = $DB->get_record_sql( $sqlStatus )->attendancestatus;
-            // Set the correct icon url for the user status
-            $studentStatus = ($attendanceStatus === "Present")? 'i/grade_correct' : 'i/grade_incorrect';
-            // Insert in the table the icon corresponding to the user status
-            array_push($row, html_writer::empty_tag('input', array('type' => 'image', 'src'=>$OUTPUT->pix_url($studentStatus), 'alt'=>"")));
-            // Increase de number of absents, or present for each student and for the given date
-            if($attendanceStatus == "Present"){
-                $npresent++;
-                $npresentDay[$dateCount]++;
-            }else{
-                $nabsent++;
-                $nabsentDay[$dateCount]++;
-            }
-            $dateCount++;
-        }
-        // Calculate the % of attendance for the current student and insert it to the row
-        $mean           = $npresent/($npresent+$nabsent);
+
+
+    $table         = new html_table();
+    $table->head   = $tableHead;
+    // in the SQL the if is made so it returns directly the url for the image to use (from the standerd image library in moodle)
+    $sqlStatus     =  " SELECT sd.id,sd.userid,ad.date ,if((sd.attendancestatus!= 'present'),'i/grade_correct','i/grade_incorrect') status
+                        FROM mdl_attendance_student_detail sd, mdl_attendance_detail ad 
+                        WHERE sd.attendancedetailid=ad.id
+                        AND ad.attendanceid= $attendance->id
+                        order by ad.date";
+    // Get student attendance status for the given date
+    $attendanceStatus   = $DB->get_records_sql( $sqlStatus );
+    foreach($attendanceStatus as $oneStatus)
+    {   
+        // Transform the attendanceStatus object array in a more friendly and easy to use bidimensional array, whit the first key as the user id, and the second as the date
+        // as a value the image input is inserted using the directory given by the query
+        $StatusArray[$oneStatus->userid][$oneStatus->date]=html_writer::empty_tag('input', array('type' => 'image', 'src'=>$OUTPUT->pix_url($oneStatus->status), 'alt'=>""));
+    }
+
+    foreach($students as $student)
+    {
+        //Create a row  whit de values of the current user status from all dates (pre sorted in the querry)
+        $row =array_values($StatusArray[$student->userid]);
+        // Get the number of inputs representing a present in the row (url='i/grade_correct')
+        $numberOfPresents= array_count_values($row)[html_writer::empty_tag('input', array('type' => 'image', 'src'=>$OUTPUT->pix_url('i/grade_correct'), 'alt'=>""))];      
+        // Get the number of inputs representing a absent in the row (url='i/grade_incorrect')
+        $numberOfAbsents= array_count_values($row)[html_writer::empty_tag('input', array('type' => 'image', 'src'=>$OUTPUT->pix_url('i/grade_incorrect'), 'alt'=>""))];
+        // Calculate the row attendance % and push it at the end of the row array
+        $mean           = $numberOfPresents/($numberOfPresents+$numberOfAbsents);
         array_push($row, percentage($mean));
-        // Add row to de table
-        $table->data[]  = $row;
-        // Reset Counts
-        $dateCount      = 0;    
-        $npresent       = 0;
-        $nabsent        = 0;
+        // Add at the begining of the row array the name-lastname of the student that the info belongs to
+        array_unshift($row, $student->firstname." ".$student->lastname);
+        // Add the row to the tableData array
+       $tableData[]=$row;
     }
-    // Create an extra row to summarize the attendance of the course
-    $row=array('Class Attendance');
-    foreach($dates as $date){ 
-        // Calcuate the mean for the given date and add it to the row
-        $meanDay[$dateCount] = $npresentDay[$dateCount]/($npresentDay[$dateCount]+$nabsentDay[$dateCount]);
-        array_push($row, percentage($meanDay[$dateCount]));
-        $dateCount++;
-    }
-    // Calculate the total attendance and add it to the row
-    array_push($row,  percentage(array_sum($meanDay)/count($meanDay)));
-    $table->data[] = $row;
+    // assing the tableData array as the data of the array and print the table
+    $table->data=$tableData;
     echo html_writer::table($table);
 
     echo '<ul class="nav nav-pills nav-stacked">
-      <li role="presentation"><a href="edit_attendance.php?id='.$id.'">Edit</a></li>
+      <li role="presentation"><a href="edit_attendance.php?id='.$id.'">'.get_string('button_edit', 'mod_attendance').'</a></li>
     </ul>';
 }else
-echo "There is no attendances to display";
+echo get_string('noAttendances', 'mod_attendance');
 // Finish the page.
 echo $OUTPUT->footer();

@@ -73,24 +73,24 @@ if ($usesections) {
 
 $modinfo = get_fast_modinfo($course);
 $currentsection = '';
-foreach ($modinfo->instances['attendance'] as $cm) {
+foreach ($modinfo->instances['attendance'] as $coursemodule) {
     $row = array();
     if ($usesections) {
-        if ($cm->sectionnum !== $currentsection) {
-            if ($cm->sectionnum) {
-                $row[] = get_section_name($course, $cm->sectionnum);
+        if ($coursemodule->sectionnum !== $currentsection) {
+            if ($coursemodule->sectionnum) {
+                $row[] = get_section_name($course, $coursemodule->sectionnum);
             }
             if ($currentsection !== '') {
                 $table->data[] = 'hr';
             }
-            $currentsection = $cm->sectionnum;
+            $currentsection = $coursemodule->sectionnum;
         }
     }
 
-    $class = $cm->visible ? null : array('class' => 'dimmed');
+    $class = $coursemodule->visible ? null : array('class' => 'dimmed');
 
-    $row[] = html_writer::link(new moodle_url('view.php', array('id' => $cm->id)),
-                $cm->get_formatted_name(), $class);
+    $row[] = html_writer::link(new moodle_url('view.php', array('id' => $coursemodule->id)),
+                $coursemodule->get_formatted_name(), $class);
     $table->data[] = $row;
 }
 
