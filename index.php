@@ -43,54 +43,54 @@ $event = \mod_attendance\event\course_module_instance_list_viewed::create($param
 $event->add_record_snapshot('course', $course);
 $event->trigger();
 
-$strname = get_string('modulenameplural', 'mod_attendance');
+$strName = get_string('modulenameplural', 'mod_attendance');
 $PAGE->set_url('/mod/attendance/index.php', array('id' => $id));
-$PAGE->navbar->add($strname);
-$PAGE->set_title("$course->shortname: $strname");
+$PAGE->navbar->add($strName);
+$PAGE->set_title("$course->shortname: $strName");
 $PAGE->set_heading($course->fullname);
 $PAGE->set_pagelayout('incourse');
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading($strname);
+echo $OUTPUT->heading($strName);
 
 if (! $attendances = get_all_instances_in_course('attendance', $course)) {
     notice(get_string('noattendances', 'attendance'), new moodle_url('/course/view.php', array('id' => $course->id)));
 }
 
-$usesections = course_format_uses_sections($course->format);
+$useSections = course_format_uses_sections($course->format);
 
 $table = new html_table();
 $table->attributes['class'] = 'generaltable mod_index';
 
-if ($usesections) {
-    $strsectionname = get_string('sectionname', 'format_'.$course->format);
-    $table->head  = array ($strsectionname, $strname);
-    $table->align = array ('center', 'left');
+if ($useSections) {
+    $strSectionName = get_string('sectionname', 'format_'.$course->format);
+    $table->head    = array ($strSectionName, $strName);
+    $table->align   = array ('center', 'left');
 } else {
-    $table->head  = array ($strname);
-    $table->align = array ('left');
+    $table->head    = array ($strName);
+    $table->align   = array ('left');
 }
 
-$modinfo = get_fast_modinfo($course);
-$currentsection = '';
-foreach ($modinfo->instances['attendance'] as $coursemodule) {
+$modInfo = get_fast_modinfo($course);
+$currentSection = '';
+foreach ($modInfo->instances['attendance'] as $courseModule) {
     $row = array();
-    if ($usesections) {
-        if ($coursemodule->sectionnum !== $currentsection) {
-            if ($coursemodule->sectionnum) {
-                $row[] = get_section_name($course, $coursemodule->sectionnum);
+    if ($useSections) {
+        if ($courseModule->sectionnum !== $currentSection) {
+            if ($courseModule->sectionnum) {
+                $row[] = get_section_name($course, $courseModule->sectionnum);
             }
-            if ($currentsection !== '') {
+            if ($currentSection !== '') {
                 $table->data[] = 'hr';
             }
-            $currentsection = $coursemodule->sectionnum;
+            $currentSection = $courseModule->sectionnum;
         }
     }
 
-    $class = $coursemodule->visible ? null : array('class' => 'dimmed');
+    $class = $courseModule->visible ? null : array('class' => 'dimmed');
 
-    $row[] = html_writer::link(new moodle_url('view.php', array('id' => $coursemodule->id)),
-                $coursemodule->get_formatted_name(), $class);
+    $row[] = html_writer::link(new moodle_url('view.php', array('id' => $courseModule->id)),
+                $courseModule->get_formatted_name(), $class);
     $table->data[] = $row;
 }
 

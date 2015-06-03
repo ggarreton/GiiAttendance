@@ -102,10 +102,6 @@ if(count($dates)!=0){
     }
     array_push($tableHead, '% Attendance');
 
-    // Insert in an array the headers to be used in the table
-    $table->head = $tableHead;
-
-
 
     $table         = new html_table();
     $table->head   = $tableHead;
@@ -114,14 +110,15 @@ if(count($dates)!=0){
                         FROM mdl_attendance_student_detail sd, mdl_attendance_detail ad 
                         WHERE sd.attendancedetailid=ad.id
                         AND ad.attendanceid= $attendance->id
-                        order by ad.date";
+                        ORDER BY ad.date";
     // Get student attendance status for the given date
     $attendanceStatus   = $DB->get_records_sql( $sqlStatus );
     foreach($attendanceStatus as $oneStatus)
     {   
         // Transform the attendanceStatus object array in a more friendly and easy to use bidimensional array, whit the first key as the user id, and the second as the date
         // as a value the image input is inserted using the directory given by the query
-        $StatusArray[$oneStatus->userid][$oneStatus->date]=html_writer::empty_tag('input', array('type' => 'image', 'src'=>$OUTPUT->pix_url($oneStatus->status), 'alt'=>""));
+        $StatusArray[$oneStatus->userid][$oneStatus->date]=html_writer::empty_tag('input', array('type' => 'image', 
+            'src'=>$OUTPUT->pix_url($oneStatus->status), 'alt'=>""));
     }
 
     foreach($students as $student)
@@ -129,11 +126,13 @@ if(count($dates)!=0){
         //Create a row  whit de values of the current user status from all dates (pre sorted in the querry)
         $row =array_values($StatusArray[$student->userid]);
         // Get the number of inputs representing a present in the row (url='i/grade_correct')
-        $numberOfPresents= array_count_values($row)[html_writer::empty_tag('input', array('type' => 'image', 'src'=>$OUTPUT->pix_url('i/grade_correct'), 'alt'=>""))];      
+        $numberOfPresents   = array_count_values($row)[html_writer::empty_tag('input', array('type' => 'image', 
+            'src'=>$OUTPUT->pix_url('i/grade_correct'), 'alt'=>""))];      
         // Get the number of inputs representing a absent in the row (url='i/grade_incorrect')
-        $numberOfAbsents= array_count_values($row)[html_writer::empty_tag('input', array('type' => 'image', 'src'=>$OUTPUT->pix_url('i/grade_incorrect'), 'alt'=>""))];
+        $numberOfAbsents    = array_count_values($row)[html_writer::empty_tag('input', array('type' => 'image', 
+            'src'=>$OUTPUT->pix_url('i/grade_incorrect'), 'alt'=>""))];
         // Calculate the row attendance % and push it at the end of the row array
-        $mean           = $numberOfPresents/($numberOfPresents+$numberOfAbsents);
+        $mean               = $numberOfPresents/($numberOfPresents+$numberOfAbsents);
         array_push($row, percentage($mean));
         // Add at the begining of the row array the name-lastname of the student that the info belongs to
         array_unshift($row, $student->firstname." ".$student->lastname);
@@ -145,9 +144,11 @@ if(count($dates)!=0){
     echo html_writer::table($table);
 
     echo '<ul class="nav nav-pills nav-stacked">
-      <li role="presentation"><a href="edit_attendance.php?id='.$id.'">'.get_string('button_edit', 'mod_attendance').'</a></li>
-    </ul>';
-}else
-echo get_string('noAttendances', 'mod_attendance');
+            <li role="presentation"><a href="edit_attendance.php?id='.$id.'">'.get_string('button_edit', 'mod_attendance').'</a></li>
+          </ul>';
+}else{
+    echo get_string('noAttendances', 'mod_attendance');
+}
+
 // Finish the page.
 echo $OUTPUT->footer();
