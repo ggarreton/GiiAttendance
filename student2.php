@@ -63,8 +63,8 @@ $timeRange      = $DB->get_record_sql( $sqlTimeRange );
 // The isset is for debugging
 if(isset($timeRange->starttime) && isset($timeRange->endtime)){
 
-        $startTime      = $timeRange->starttime;
-        $endTime        = $timeRange->endtime;
+    $startTime      = $timeRange->starttime;
+    $endTime        = $timeRange->endtime;
 
     $status         = $DB->get_record_sql( "SELECT attendancestatus 
                                             FROM mdl_attendance_student_detail 
