@@ -130,6 +130,7 @@ if($dbLastDate===$now){
                                                                 WHERE attendanceid = $attendance->id
                                                                 ORDER BY id DESC
                                                                 LIMIT 1");
+        $recordAbsent                   = new stdClass();
         foreach ($students as $student) {
             // Until the Student mark their attendance, by default they are listed as absent
             $recordAbsent->attendancedetailid      = $currentAttendanceId->id;
