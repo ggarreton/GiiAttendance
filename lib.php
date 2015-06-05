@@ -463,14 +463,15 @@ function VerifyRole($role){
     // Gets the course context
     $contextCourse = context_course::instance($COURSE->id);
     // look in the context for the current user's role shortname
-    $roleShortname = current(get_user_roles($contextCourse, $USER->id))->shortname;
-    // if the current user's role shortname contains the string in the param $role returns true, if not, false
-    // ej si buscamos como
-    if (strpos($roleShortname,$role) !== false) {
-        return true;
-    }
-    else{
-        return false;
+    if(isset(current(get_user_roles($contextCourse, $USER->id))->shortname)){
+        $roleShortname = current(get_user_roles($contextCourse, $USER->id))->shortname;
+        // if the current user's role shortname contains the string in the param $role returns true, if not, false
+        if (strpos($roleShortname,$role) !== false) {
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 }
 

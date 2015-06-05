@@ -73,12 +73,13 @@ $sqlLastDate=  "SELECT  date
                 limit 1";
 // Get last attendance incerted in the DB
 $lastDate   = $DB->get_record_sql($sqlLastDate);
-//Transform the date fetched from the DB to day-month-year format
-$dbLastDate = usergetdate($lastDate->date)['mday'].'-'.usergetdate($lastDate->date)['month'].'-'.usergetdate($lastDate->date)['year'];
-// Transform current date Timestamp to the day-month-year format
+if(isset($lastDate->date)){
+    //Transform the date fetched from the DB to day-month-year format
+    $dbLastDate = usergetdate($lastDate->date)['mday'].'-'.usergetdate($lastDate->date)['month'].'-'.usergetdate($lastDate->date)['year'];
+}
 $now        = usergetdate(time())['mday'].'-'.usergetdate(time())['month'].'-'.usergetdate(time())['year'];
 // Verify if the text are equals
-if($dbLastDate===$now){
+if(isset($lastDate->date) && $dbLastDate===$now){
     //  Give the error message and a return button
     echo get_string('already_passed_attendance', 'mod_attendance');
     echo   '<ul class="nav nav-tabs">
